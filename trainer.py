@@ -2,9 +2,11 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.optim import Adam, SGD
+from torch.optim.lr_scheduler import StepLR, LambdaLR
 from torch.nn.functional import cross_entropy, mse_loss
 from logger import Logger
 from utils import plot_im_with_bbox
+
 OPTIMIZERS = {
     "sgd": SGD,
     "adam": Adam
@@ -28,11 +30,20 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
         "lr": train_params.get("lr"),
         "params": pnet.parameters()
     }
+
+    def lr_step(epoch):
+        if epoch <= 50:
+            return 1.0
+        else:
+            return 0.1
+
     optimizer = load_optimizer(optimizer_name=train_params.get("optimizer"),
                                optimizer_params=optimizer_params)
+    lr_scheduler = LambdaLR(optimizer=optimizer, lr_lambda=lr_step)
+
     detection_loss = cross_entropy
     bbox_loss = mse_loss
-    header = ["epoch", "detection_loss", "bbox_loss", "total_loss"]
+    header = ["epoch", "detection_loss", "bbox_loss", "total_loss", "lr"]
     train_logger = Logger(header=header, out_dir=out_dir, log_name="train_log")
     val_logger = Logger(header=header, out_dir=out_dir, log_name="val_log")
     if device == "cuda" and not torch.cuda.is_available():
@@ -63,7 +74,8 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
         train_detection_loss = train_detection_loss / len(train_dataloader)
         train_bbox_loss = train_bbox_loss / len(train_dataloader)
         train_loss = train_loss / len(train_dataloader)
-        train_logger.write(line=[epoch, train_detection_loss, train_bbox_loss, train_loss])
+        current_lr = lr_scheduler.get_last_lr()[0]
+        train_logger.write(line=[epoch, train_detection_loss, train_bbox_loss, train_loss, current_lr])
         if checkpoint_step is not None and (epoch % checkpoint_step) == 0:
             train_logger.save_model(model=pnet, checkpoint_name=f"checkpoint_epoch_{epoch}.pth")
 
@@ -85,7 +97,10 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             val_detection_loss = val_detection_loss / len(val_dataloader)
             val_bbox_loss = val_bbox_loss / len(val_dataloader)
             val_loss = val_loss / len(val_dataloader)
-            val_logger.write(line=[epoch, val_detection_loss, val_bbox_loss, val_loss])
+            val_logger.write(line=[epoch, val_detection_loss, val_bbox_loss, val_loss, current_lr])
+
+        # update step size
+        lr_scheduler.step()
 
     train_logger.save_model(model=pnet, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
 

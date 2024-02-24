@@ -37,13 +37,16 @@ class PNetDataset(Dataset):
     def __generate_sample(self, im, bbox, expected_label, crop_size):
         generate_sample = True
         cropped_im, cropped_bbox = im, bbox
+        tries_count = 0
         while generate_sample:
             cropped_im, cropped_bbox = random_crop_and_update_bbox(im, bbox, crop_size)
             image_bbox = torch.tensor([0, 0, cropped_im.shape[2], cropped_im.shape[1]])
             iou = IoU(image_bbox, cropped_bbox)
             if (iou >= self.pos_th and expected_label) or (iou <= self.neg_th and not expected_label):
                 break
-
+            tries_count += 1
+            if tries_count >= 5:
+                break
         return cropped_im, cropped_bbox
 
     def __getitem__(self, item):
