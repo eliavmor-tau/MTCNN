@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.optim import Adam, SGD
 from torch.nn.functional import cross_entropy, mse_loss
-from MTCNN.logger import Logger
+from logger import Logger
 
 OPTIMIZERS = {
     "sgd": SGD,

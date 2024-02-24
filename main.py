@@ -1,5 +1,5 @@
 from model import PNet
-from MTCNN.datasets import PNetDataset
+from datasets import PNetDataset
 from torchvision.transforms import ToTensor, Compose
 from trainer import train_pnet
 
