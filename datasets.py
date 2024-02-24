@@ -11,7 +11,7 @@ from torchvision.transforms import ToTensor,Resize
 class PNetDataset(Dataset):
 
     def __init__(self, path: str, partition: str, transform=None, neg_th: int = 0.3, pos_th: int = 0.65,
-                 min_crop: int = 12, max_crop: int = 100, out_size=12) -> Dataset:
+                 min_crop: int = 12, max_crop: int = 100, out_size=12, p_prob=0.5) -> Dataset:
         super(PNetDataset, self).__init__()
         self.path = path
         data_partition = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
@@ -28,6 +28,7 @@ class PNetDataset(Dataset):
         self.max_crop = max_crop
         self.neg_th = neg_th
         self.pos_th = pos_th
+        self.p_prob = p_prob
         self.out_size = out_size
         self.resize_transform = Resize(out_size, antialias=True)
         self.data_split = data_partition[data_partition['partition'] == partition].image_name
@@ -48,7 +49,7 @@ class PNetDataset(Dataset):
     def __getitem__(self, item):
         if 0 <= item < self.__len__():
             p = np.random.uniform(0, 1)
-            expected_label = p >= 0.5
+            expected_label = p >= self.p_prob
             crop_size = np.random.randint(self.min_crop, self.max_crop, size=1)[0]
             crop_size = [crop_size, crop_size]
             sample_name = self.data_split.iloc[item]

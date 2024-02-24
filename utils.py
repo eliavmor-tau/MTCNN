@@ -36,8 +36,8 @@ def random_crop_and_update_bbox(image, bbox, output_size):
     # Randomly crop the image
     im_height, im_width = image.shape[1], image.shape[2]
     crop_height, crop_width = output_size[0], output_size[1]
-    y_crop = np.random.randint(0, max(0, im_height - output_size[0]))
-    x_crop = np.random.randint(0, max(0, im_width - output_size[1]))
+    y_crop = np.random.randint(0, max(1, im_height - output_size[0]))
+    x_crop = np.random.randint(0, max(1, im_width - output_size[1]))
     cropped_image = image[:, y_crop: y_crop + crop_height, x_crop: x_crop + crop_width]
     new_bbox = [0, 0, 0, 0]
     # Update bounding box coordinates

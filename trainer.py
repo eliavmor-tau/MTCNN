@@ -4,7 +4,7 @@ from tqdm import tqdm
 from torch.optim import Adam, SGD
 from torch.nn.functional import cross_entropy, mse_loss
 from logger import Logger
-
+from utils import plot_im_with_bbox
 OPTIMIZERS = {
     "sgd": SGD,
     "adam": Adam
@@ -88,3 +88,14 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             val_logger.write(line=[epoch, val_detection_loss, val_bbox_loss, val_loss])
 
     train_logger.save_model(model=pnet, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
+
+
+def view_pnet_predictions(pnet, dataset):
+    dataloader = DataLoader(dataset=dataset, batch_size=1, shuffle=True, num_workers=2)
+    for batch in dataloader:
+        images, bboxes, y = batch[0], batch[1], batch[2]
+        out = pnet(images)
+        pred_bboxes = out["bbox_pred"]
+        y_pred = out["y_pred"]
+        plot_im_with_bbox(images[0], bboxes[0], title=f"label={y}")
+        plot_im_with_bbox(images[0], pred_bboxes[0], title=f"prediction label={torch.argmax(y_pred)}")
