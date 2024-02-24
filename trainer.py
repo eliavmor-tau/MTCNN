@@ -22,8 +22,8 @@ def load_optimizer(optimizer_name, optimizer_params):
 def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu"):
     n_epochs = train_params.get("n_epochs")
     batch_size = train_params.get("batch_size")
-    train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-    val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+    train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
     optimizer_params = {
         "lr": train_params.get("lr"),
         "params": pnet.parameters()
@@ -41,6 +41,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
 
     device = torch.device(device=device)
     pnet.to(device)
+    print(f"running on {device}")
     for epoch in tqdm(range(n_epochs), desc=f"epochs", total=n_epochs):
         train_detection_loss, train_bbox_loss, train_loss = 0, 0, 0
         for batch in train_dataloader:

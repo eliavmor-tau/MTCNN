@@ -10,9 +10,9 @@ if __name__ == "__main__":
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 10,
+        "n_epochs": 1000,
         "batch_size": 16,
     }
     pnet = PNet()
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="../pnet", checkpoint_step=2)
+               out_dir="pnet", checkpoint_step=50, device="cuda")
