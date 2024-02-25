@@ -5,13 +5,13 @@ import os
 from utils import random_crop_and_update_bbox, plot_im_with_bbox, IoU
 from PIL import Image
 import numpy as np
-from torchvision.transforms import ToTensor,Resize
+from torchvision.transforms import ToTensor, Resize
 
 
 class PNetDataset(Dataset):
 
     def __init__(self, path: str, partition: str, transform=None, neg_th: int = 0.3, pos_th: int = 0.65,
-                 min_crop: int = 12, max_crop: int = 100, out_size=12, p_prob=0.5) -> Dataset:
+                 min_crop: int = 12, max_crop: int = 100, out_size=12, n=1000) -> Dataset:
         super(PNetDataset, self).__init__()
         self.path = path
         data_partition = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
@@ -28,11 +28,50 @@ class PNetDataset(Dataset):
         self.max_crop = max_crop
         self.neg_th = neg_th
         self.pos_th = pos_th
-        self.p_prob = p_prob
         self.out_size = out_size
         self.resize_transform = Resize(out_size, antialias=True)
         self.data_split = data_partition[data_partition['partition'] == partition].image_name
         self.transform = transform
+        self.n = min(n, len(self.data_split))
+        self.labels = []
+        self.bboxes = []
+        self.images = []
+        self.__create_data()
+
+    def __create_data(self):
+        for i in range(self.n // 2):
+            expected_label = True
+            crop_size = np.random.randint(self.min_crop, self.max_crop, size=1)[0]
+            crop_size = [crop_size, crop_size]
+            item = np.random.randint(0, len(self.data_split))
+            sample_name = self.data_split.iloc[item]
+            bbox = torch.tensor(list(self.bbox[self.bbox['image_name'] == sample_name].to_numpy()[0][2:-1]))
+            im = np.array(Image.open(os.path.join(self.path, "images", sample_name)))
+            if self.transform is not None:
+                im = self.transform(im)
+            im, bbox = self.__generate_sample(im, bbox, expected_label, crop_size)
+            im = self.resize_transform(im)
+            bbox = torch.round(bbox * self.out_size / crop_size[0])
+            self.labels.append(torch.tensor(int(expected_label), dtype=torch.long))
+            self.bboxes.append(bbox)
+            self.images.append(im)
+
+        for i in range(self.n // 2):
+            expected_label = False
+            crop_size = np.random.randint(self.min_crop, self.max_crop, size=1)[0]
+            crop_size = [crop_size, crop_size]
+            item = np.random.randint(0, len(self.data_split))
+            sample_name = self.data_split.iloc[item]
+            bbox = torch.tensor(list(self.bbox[self.bbox['image_name'] == sample_name].to_numpy()[0][2:-1]))
+            im = np.array(Image.open(os.path.join(self.path, "images", sample_name)))
+            if self.transform is not None:
+                im = self.transform(im)
+            im, bbox = self.__generate_sample(im, bbox, expected_label, crop_size)
+            im = self.resize_transform(im)
+            bbox = torch.round(bbox * self.out_size / crop_size[0])
+            self.labels.append(torch.tensor(int(expected_label), dtype=torch.long))
+            self.bboxes.append(bbox)
+            self.images.append(im)
 
     def __generate_sample(self, im, bbox, expected_label, crop_size):
         generate_sample = True
@@ -51,19 +90,39 @@ class PNetDataset(Dataset):
 
     def __getitem__(self, item):
         if 0 <= item < self.__len__():
-            p = np.random.uniform(0, 1)
-            expected_label = p >= self.p_prob
-            crop_size = np.random.randint(self.min_crop, self.max_crop, size=1)[0]
-            crop_size = [crop_size, crop_size]
+            return self.images[item], self.bboxes[item], self.labels[item]
+
+    def __len__(self):
+        return len(self.labels)
+
+
+class FacesDataSet(Dataset):
+
+    def __init__(self, path: str, partition: str, transform=None) -> Dataset:
+        super(FacesDataSet, self).__init__()
+        self.path = path
+        data_partition = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
+        self.bbox = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
+        if partition.lower() == "train":
+            partition = 0
+        elif partition.lower() == "val":
+            partition = 1
+        elif partition.lower() == "test":
+            partition = 2
+        else:
+            raise (f"unkonwn partition {partition}")
+
+        self.data_split = data_partition[data_partition['partition'] == partition].image_name
+        self.transform = transform
+
+    def __getitem__(self, item):
+        if 0 <= item < self.__len__():
             sample_name = self.data_split.iloc[item]
             bbox = torch.tensor(list(self.bbox[self.bbox['image_name'] == sample_name].to_numpy()[0][2:-1]))
             im = np.array(Image.open(os.path.join(self.path, "images", sample_name)))
             if self.transform is not None:
                 im = self.transform(im)
-            im, bbox = self.__generate_sample(im, bbox, expected_label, crop_size)
-            im = self.resize_transform(im)
-            bbox = torch.round(bbox * self.out_size / crop_size[0])
-            return im, bbox, torch.tensor(int(expected_label), dtype=torch.long)
+            return im
 
     def __len__(self):
         return len(self.data_split)
@@ -73,7 +132,7 @@ if __name__ == "__main__":
     # test dataset.
     dataset = PNetDataset(path="data/celebA", partition="val",
                           transform=ToTensor(), min_crop=30, max_crop=100,
-                          out_size=12)
-    for i in range(20):
+                          out_size=12, n=100)
+    for i in range(100):
         im, bbox, label = dataset[i]
-        plot_im_with_bbox(im, bbox, title=f"image={i} label={label}")
+        plot_im_with_bbox(im, [bbox], title=f"image={i} label={label}")
