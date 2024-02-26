@@ -39,7 +39,7 @@ def test_propose_net():
 
 
 if __name__ == "__main__":
-    test_propose_net()
+    # test_propose_net()
     transform = Compose([ToTensor()])
     train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=10000)
     val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=1000)
