@@ -81,7 +81,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
 
         with torch.no_grad():
             val_detection_loss, val_bbox_loss, val_loss = 0, 0, 0
-            for batch in train_dataloader:
+            for batch in val_dataloader:
                 images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
                 out = pnet(images)
                 pred_bboxes = out["bbox_pred"]

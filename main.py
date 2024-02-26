@@ -44,19 +44,19 @@ if __name__ == "__main__":
     # test_propose_net()
     transform = Compose([ToTensor()])
     train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=4000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=600)
+    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=400)
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 1000,
+        "n_epochs": 2000,
         "batch_size": 32,
     }
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_retrain/checkpoint/last_epoch_checkpoint_500.pth')
+    # checkpoint = torch.load('pnet_retrain/checkpoint/last_epoch_checkpoint_500.pth')
     # Load the model state dictionary
-    pnet.load_state_dict(checkpoint)
+    # pnet.load_state_dict(checkpoint)
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_retrain_2", checkpoint_step=50, device="cuda")
+               out_dir="pnet_training", checkpoint_step=50, device="cuda")
 
     # view_pnet_predictions(pnet, train_dataset)
