@@ -64,7 +64,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             y_pred = out["y_pred"]
             l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
             l_detect = detection_loss(input=y_pred, target=y, reduction="mean")
-            loss = (l_detect + l_bbox) / 2.
+            loss = l_detect + l_bbox * 0.5
 
             train_detection_loss += l_detect.detach().item()
             train_bbox_loss += l_bbox.detach().item()
@@ -91,7 +91,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
                 y_pred = out["y_pred"]
                 l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
                 l_detect = detection_loss(input=y_pred, target=y, reduction="mean")
-                loss = (l_detect + l_bbox) / 2.
+                loss = l_detect + l_bbox * 0.5
 
                 val_detection_loss += l_detect.detach().item()
                 val_bbox_loss += l_bbox.detach().item()
