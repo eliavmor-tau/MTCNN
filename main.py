@@ -57,5 +57,5 @@ if __name__ == "__main__":
     # rnet = RNet()
 
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training", checkpoint_step=50, device="cuda")
+               out_dir="pnet_training", checkpoint_step=10, device="cuda")
 
