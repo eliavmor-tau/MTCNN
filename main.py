@@ -14,12 +14,12 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_100.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
     resize = Resize(size=(12, 12), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -39,23 +39,24 @@ def test_propose_net():
 
 
 if __name__ == "__main__":
+    pass
     # test_propose_net()
-    transform = Compose([ToTensor()])
-    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=10000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=1000)
-    train_params = {
-        "lr": 1e-3,
-        "optimizer": "adam",
-        "n_epochs": 200,
-        "batch_size": 128,
-    }
-    pnet = PNet()
+    # transform = Compose([ToTensor()])
+    # train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=10000)
+    # val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=1000)
+    # train_params = {
+    #     "lr": 1e-3,
+    #     "optimizer": "adam",
+    #     "n_epochs": 200,
+    #     "batch_size": 128,
+    # }
+    # pnet = PNet()
     # Load the checkpoint
     # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_100.pth')
     # Load the model state dictionary
     # pnet.load_state_dict(checkpoint)
     # rnet = RNet()
-
-    train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training", checkpoint_step=10, device="cuda")
+    #
+    # train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
+    #            out_dir="pnet_training", checkpoint_step=10, device="cuda")
 
