@@ -15,12 +15,12 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_retrain/checkpoint/last_checkpoint_epoch_500.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
     resize = Resize(size=(12, 12), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -36,20 +36,19 @@ def test_propose_net():
             bbox[0][1] = bbox[0][1] * orig_y / float(12)
             bbox[0][3] = bbox[0][3] * orig_y / float(12)
             bboxes.append(bbox.detach()[0])
-        print(bboxes)
         plot_im_with_bbox(im[0], bboxes)
 
 
 if __name__ == "__main__":
     # test_propose_net()
     transform = Compose([ToTensor()])
-    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=4000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=400)
+    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=10000)
+    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=1000)
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 2000,
-        "batch_size": 32,
+        "n_epochs": 400,
+        "batch_size": 64,
     }
     pnet = PNet()
     # Load the checkpoint
