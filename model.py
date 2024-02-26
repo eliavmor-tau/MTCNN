@@ -25,5 +25,37 @@ class PNet(nn.Module):
         x = self.prelu(self.conv2(x))
         x = self.prelu(self.conv3(x))
         bbox_layer = self.prelu(self.conv4_0(x)).reshape((batch_size, -1))
-        classification_layer = self.prelu(self.conv4_1(x)).reshape((batch_size, -1))
+        classification_layer = self.conv4_1(x).reshape((batch_size, -1))
+        return {"bbox_pred": bbox_layer, "y_pred": classification_layer}
+
+
+class RNet(nn.Module):
+
+    def __init__(self):
+        super(RNet, self).__init__()
+        # Define P-Net architecture
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=28, kernel_size=3, stride=1)
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.prelu = nn.PReLU()
+
+        self.conv2 = nn.Conv2d(in_channels=28, out_channels=48, kernel_size=3, stride=1)
+
+        self.conv3 = nn.Conv2d(in_channels=48, out_channels=64, kernel_size=3, stride=1)
+
+        self.linear0 = nn.Linear(in_features=9*64, out_features=128)
+
+        # Bounding box regression layer
+        self.linear1_0 = nn.Linear(in_features=128, out_features=4)
+        # Classification layer
+        self.linear1_1 = nn.Linear(in_features=128, out_features=2)
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        x = self.prelu(self.pool1(self.conv1(x)))
+        x = self.prelu(self.conv2(x))
+        x = self.prelu(self.conv3(x))
+        x = x.view((batch_size, 9*64))
+        x = self.prelu(self.linear0(x))
+        bbox_layer = self.prelu(self.linear1_0(x))
+        classification_layer = self.linear1_1(x)
         return {"bbox_pred": bbox_layer, "y_pred": classification_layer}

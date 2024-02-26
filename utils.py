@@ -5,17 +5,30 @@ import torch
 from torchvision.transforms import Resize, ToTensor
 from torch import Tensor
 from torchvision.ops import box_iou
+from torchvision.ops import nms
 
 
-def plot_im_with_bbox(im: Tensor, bboxes: list, title=""):
+def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou_threshold: float = 0.6, title=""):
     if im.shape[0] == 3 and im.shape[2] != 3:
-        print("transform")
         im = np.transpose(im, axes=(1, 2, 0))
     fig, axis = plt.subplots()
     fig.suptitle(title)
     axis.imshow(im)
     for bbox in bboxes:
         rec = patches.Rectangle(xy=(bbox[0], bbox[1]), width=bbox[2], height=bbox[3], linewidth=2, edgecolor='green',
+                                facecolor='none')
+        axis.add_patch(rec)
+    bboxes = torch.vstack(bboxes)
+    if scores is None:
+        scores = torch.ones(bboxes.shape[0])
+    else:
+        scores = torch.hstack(scores)
+    bboxes[:, 2] = bboxes[:, 0] + bboxes[:, 2]
+    bboxes[:, 3] = bboxes[:, 1] + bboxes[:, 3]
+    bboxes_indices = nms(bboxes, scores, iou_threshold)
+    for index in bboxes_indices:
+        rec = patches.Rectangle(xy=(bboxes[index][0], bboxes[index][1]), width=bboxes[index][2] - bboxes[index][0],
+                                height=bboxes[index][3] - bboxes[index][1], linewidth=2, edgecolor='blue',
                                 facecolor='none')
         axis.add_patch(rec)
     plt.imshow(im)
