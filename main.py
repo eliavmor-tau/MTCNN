@@ -74,17 +74,17 @@ def run_train_pnet():
     val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=60, max_crop=140,
                               n=1000)
     train_params = {
-        "lr": 1e-3,
-        "optimizer": "adam",
+        "lr": 1e-4,
+        "optimizer": "sgd",
         "n_epochs": 200,
         "batch_size": 128,
     }
     pnet = PNet()
-    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
-    # pnet.load_state_dict(checkpoint)
+    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
+    pnet.load_state_dict(checkpoint)
 
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training_2", checkpoint_step=10, device="cuda")
+               out_dir="pnet_training_3", checkpoint_step=10, device="cuda", wd=1e-2)
 
 
 def run_train_rnet():
