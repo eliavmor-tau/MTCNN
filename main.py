@@ -14,7 +14,8 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    # checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
@@ -69,22 +70,22 @@ def test_residual_net():
 
 def run_train_pnet():
     transform = Compose([ToTensor()])
-    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=60, max_crop=140,
+    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=140,
                                 n=10000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=60, max_crop=140,
+    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=140,
                               n=1000)
     train_params = {
         "lr": 1e-4,
         "optimizer": "sgd",
-        "n_epochs": 200,
+        "n_epochs": 100,
         "batch_size": 128,
     }
     pnet = PNet()
-    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
 
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training_3", checkpoint_step=10, device="cuda", wd=1e-2)
+               out_dir="pnet_training_2", checkpoint_step=10, device="cuda", wd=1e-3)
 
 
 def run_train_rnet():
