@@ -110,5 +110,5 @@ def run_train_rnet():
 
 if __name__ == "__main__":
     # test_propose_net()
-    test_residual_net()
-    # run_train_rnet()
+    # test_residual_net()
+    run_train_rnet()
