@@ -80,11 +80,11 @@ def run_train_pnet():
         "batch_size": 128,
     }
     pnet = PNet()
-    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
-    pnet.load_state_dict(checkpoint)
+    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    # pnet.load_state_dict(checkpoint)
 
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training", checkpoint_step=10, device="cuda")
+               out_dir="pnet_training_2", checkpoint_step=10, device="cuda")
 
 
 def run_train_rnet():
@@ -92,16 +92,16 @@ def run_train_rnet():
     pnet = PNet()
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
-    train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform, min_crop=80,
+    train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform, min_crop=60,
                                 max_crop=180, n=10000, n_hard=0, out_size=24)
-    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=80,
+    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60,
                               max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
         "n_epochs": 200,
-        "batch_size": 256,
+        "batch_size": 128,
     }
     rnet = RNet()
     train_pnet(pnet=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
@@ -111,4 +111,5 @@ def run_train_rnet():
 if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
-    run_train_rnet()
+    # run_train_rnet()
+    run_train_pnet()
