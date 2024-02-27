@@ -104,5 +104,11 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
 
         # update step size
         lr_scheduler.step()
+        if epoch % 10 == 0:
+            print(f"train_detection_loss={train_detection_loss}")
+            print(f"train_bbox_loss={train_bbox_loss}")
+            print(f"val_detection_loss={val_detection_loss}")
+            print(f"val_bbox_loss={val_bbox_loss}")
+            print("-"* 25)
 
     train_logger.save_model(model=pnet, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
