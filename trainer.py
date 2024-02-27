@@ -32,7 +32,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
     }
 
     def lr_step(epoch):
-        if epoch <= 100:
+        if epoch <= 1000:
             return 1.0
         else:
             return 0.1
