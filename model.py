@@ -42,20 +42,19 @@ class RNet(nn.Module):
 
         self.conv3 = nn.Conv2d(in_channels=48, out_channels=64, kernel_size=2, stride=1)
 
-        self.linear0 = nn.Linear(in_features=9*64, out_features=128)
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1)
 
         # Bounding box regression layer
-        self.linear1_0 = nn.Linear(in_features=128, out_features=4)
+        self.conv5_0 = nn.Conv2d(in_channels=128, out_channels=4, kernel_size=1, stride=1)
         # Classification layer
-        self.linear1_1 = nn.Linear(in_features=128, out_features=2)
+        self.conv5_1 = nn.Conv2d(in_channels=128, out_channels=2, kernel_size=1, stride=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
         x = self.prelu(self.pool1(self.conv1(x)))
         x = self.prelu(self.pool1(self.conv2(x)))
         x = self.prelu(self.conv3(x))
-        x = x.view((batch_size, 9*64))
-        x = self.prelu(self.linear0(x))
-        bbox_layer = self.prelu(self.linear1_0(x))
-        classification_layer = self.linear1_1(x)
+        x = self.prelu(self.conv4(x))
+        bbox_layer = self.prelu(self.conv5_0(x)).view((batch_size, -1))
+        classification_layer = self.conv5_1(x).view((batch_size, -1))
         return {"bbox_pred": bbox_layer, "y_pred": classification_layer}

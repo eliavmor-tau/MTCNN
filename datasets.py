@@ -131,8 +131,8 @@ class RNetDataset(Dataset):
             iou = IoU(image_bbox, cropped_bbox)
             if (iou >= self.pos_th and expected_label) or (iou <= self.neg_th and not expected_label):
                 break
-            crop_size[0] = max(int((crop_size[0] * 0.9)), 20)
-            crop_size[1] = max(int((crop_size[1] * 0.9)), 20)
+            crop_size[0] = max(int((crop_size[0] * 0.9)), self.min_crop)
+            crop_size[1] = max(int((crop_size[1] * 0.9)), self.min_crop)
         return cropped_im, cropped_bbox
 
     def __generate_sample(self, label: bool):
@@ -190,13 +190,13 @@ class RNetDataset(Dataset):
             self.bboxes.append(bbox)
             self.images.append(im)
 
-        for i in tqdm(range(self.n_hard // 2), desc="Generate positive hard samples", total=self.n // 2):
+        for i in tqdm(range(self.n_hard // 2), desc="Generate positive hard samples", total=self.n_hard // 2):
             im, bbox = self.__generate_hard_samples(True)
             self.labels.append(torch.tensor(1, dtype=torch.long))
             self.bboxes.append(bbox)
             self.images.append(im)
 
-        for i in tqdm(range(self.n_hard // 2), desc="Generate negative hard samples", total=self.n // 2):
+        for i in tqdm(range(self.n_hard // 2), desc="Generate negative hard samples", total=self.n_hard // 2):
             im, bbox = self.__generate_hard_samples(False)
             self.labels.append(torch.tensor(0, dtype=torch.long))
             self.bboxes.append(bbox)
@@ -257,8 +257,8 @@ if __name__ == "__main__":
 
     # test dataset.
     dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train",
-                          transform=ToTensor(), min_crop=60, max_crop=100,
-                          out_size=24, n=10, n_hard=10)
-    for i in range(100):
+                          transform=ToTensor(), min_crop=80, max_crop=100,
+                          out_size=24, n=0, n_hard=100)
+    for i in range(len(dataset)):
         im, bbox, label = dataset[i]
         plot_im_with_bbox(im, [bbox], title=f"image={i} label={label}")
