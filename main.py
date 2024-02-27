@@ -101,11 +101,11 @@ def run_train_rnet():
         "lr": 1e-3,
         "optimizer": "adam",
         "n_epochs": 200,
-        "batch_size": 128,
+        "batch_size": 256,
     }
     rnet = RNet()
     train_pnet(pnet=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="rnet_training", checkpoint_step=10, device="cuda", weights=[1.0, 1.0])
+               out_dir="rnet_training", checkpoint_step=10, device="cuda", weights=[1.0, 0.5], wd=0)
 
 
 if __name__ == "__main__":

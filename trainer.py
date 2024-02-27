@@ -21,14 +21,16 @@ def load_optimizer(optimizer_name, optimizer_params):
     return optimizer
 
 
-def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu", weights=[1., 0.5]):
+def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu",
+               weights=[1., 0.5], wd=0):
     n_epochs = train_params.get("n_epochs")
     batch_size = train_params.get("batch_size")
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
     optimizer_params = {
         "lr": train_params.get("lr"),
-        "params": pnet.parameters()
+        "params": pnet.parameters(),
+        "weight_decay": wd
     }
 
     def lr_step(epoch):
@@ -109,6 +111,6 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             print(f"train_bbox_loss={train_bbox_loss}")
             print(f"val_detection_loss={val_detection_loss}")
             print(f"val_bbox_loss={val_bbox_loss}")
-            print("-"* 25)
+            print("-" * 25)
 
     train_logger.save_model(model=pnet, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
