@@ -43,7 +43,7 @@ def test_residual_net():
 
     pnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_40.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
@@ -100,12 +100,12 @@ def run_train_rnet():
     train_params = {
         "lr": 1e-4,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 800,
         "batch_size": 32,
     }
     rnet = RNet()
     train_pnet(pnet=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="rnet_training", checkpoint_step=10, device="cuda")
+               out_dir="rnet_training", checkpoint_step=10, device="cuda", weights=[1.0, 1.0])
 
 
 if __name__ == "__main__":

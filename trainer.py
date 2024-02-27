@@ -21,7 +21,7 @@ def load_optimizer(optimizer_name, optimizer_params):
     return optimizer
 
 
-def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu"):
+def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu", weights=[1., 0.5]):
     n_epochs = train_params.get("n_epochs")
     batch_size = train_params.get("batch_size")
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
@@ -64,7 +64,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             y_pred = out["y_pred"]
             l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
             l_detect = detection_loss(input=y_pred, target=y, reduction="mean")
-            loss = l_detect + l_bbox * 0.5
+            loss = l_detect * weights[0] + l_bbox * weights[1]
 
             train_detection_loss += l_detect.detach().item()
             train_bbox_loss += l_bbox.detach().item()
@@ -91,7 +91,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
                 y_pred = out["y_pred"]
                 l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
                 l_detect = detection_loss(input=y_pred, target=y, reduction="mean")
-                loss = l_detect + l_bbox * 0.5
+                loss = l_detect * weights[0] + l_bbox * weights[1]
 
                 val_detection_loss += l_detect.detach().item()
                 val_bbox_loss += l_bbox.detach().item()
