@@ -1,6 +1,6 @@
 import numpy as np
 from model import PNet, RNet
-from datasets import PNetDataset, FacesDataSet
+from datasets import PNetDataset, FacesDataSet, RNetDataset
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train_pnet
 import torch
@@ -39,11 +39,10 @@ def test_propose_net():
 
 
 if __name__ == "__main__":
-    pass
     # test_propose_net()
     # transform = Compose([ToTensor()])
-    # train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=20, max_crop=140, n=10000)
-    # val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=20, max_crop=140, n=1000)
+    # train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=60, max_crop=140, n=10000)
+    # val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=60, max_crop=140, n=1000)
     # train_params = {
     #     "lr": 1e-3,
     #     "optimizer": "adam",
@@ -51,12 +50,27 @@ if __name__ == "__main__":
     #     "batch_size": 128,
     # }
     # pnet = PNet()
-    # Load the checkpoint
-    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_100.pth')
-    # Load the model state dictionary
+    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     # pnet.load_state_dict(checkpoint)
-    # rnet = RNet()
     #
     # train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
     #            out_dir="pnet_training", checkpoint_step=10, device="cuda")
+
+    transform = Compose([ToTensor()])
+    pnet = PNet()
+    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    pnet.load_state_dict(checkpoint)
+    train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform, min_crop=60, max_crop=140,
+                                n=5000, n_hard=5000, out_size=24)
+    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60, max_crop=140,
+                              n=500, n_hard=500, out_size=24)
+    train_params = {
+        "lr": 1e-3,
+        "optimizer": "adam",
+        "n_epochs": 200,
+        "batch_size": 64,
+    }
+    rnet = RNet()
+    train_pnet(pnet=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
+               out_dir="rnet_training", checkpoint_step=10, device="cuda")
 

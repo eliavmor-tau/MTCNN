@@ -26,11 +26,11 @@ def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou
     bboxes[:, 2] = bboxes[:, 0] + bboxes[:, 2]
     bboxes[:, 3] = bboxes[:, 1] + bboxes[:, 3]
     bboxes_indices = nms(bboxes, scores, iou_threshold)
-    for index in bboxes_indices:
-        rec = patches.Rectangle(xy=(bboxes[index][0], bboxes[index][1]), width=bboxes[index][2] - bboxes[index][0],
-                                height=bboxes[index][3] - bboxes[index][1], linewidth=2, edgecolor='blue',
-                                facecolor='none')
-        axis.add_patch(rec)
+    # for index in bboxes_indices:
+    #     rec = patches.Rectangle(xy=(bboxes[index][0], bboxes[index][1]), width=bboxes[index][2] - bboxes[index][0],
+    #                             height=bboxes[index][3] - bboxes[index][1], linewidth=2, edgecolor='blue',
+    #                             facecolor='none')
+    #     axis.add_patch(rec)
     plt.imshow(im)
     plt.show()
     plt.close()
