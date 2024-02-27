@@ -49,8 +49,8 @@ class PNetDataset(Dataset):
             iou = IoU(image_bbox, cropped_bbox)
             if (iou >= self.pos_th and expected_label) or (iou <= self.neg_th and not expected_label):
                 break
-            crop_size[0] = max(int((crop_size[0] * 0.9)), 20)
-            crop_size[1] = max(int((crop_size[0] * 0.9)), 20)
+            crop_size[0] = max(int((crop_size[0] * 0.9)), 30)
+            crop_size[1] = max(int((crop_size[1] * 0.9)), 30)
         return cropped_im, cropped_bbox
 
     def __generate_sample(self, label: bool):
