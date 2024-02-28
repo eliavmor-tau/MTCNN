@@ -70,18 +70,19 @@ def test_residual_net():
 
 def run_train_pnet():
     transform = Compose([ToTensor()])
-    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=140,
+    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
                                 n=10000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=140,
+    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
                               n=1000)
     train_params = {
-        "lr": 1e-4,
-        "optimizer": "sgd",
+        "lr": 1e-2,
+        "optimizer": "adam",
         "n_epochs": 100,
         "batch_size": 128,
     }
     pnet = PNet()
-    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
 
     train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
@@ -99,7 +100,7 @@ def run_train_rnet():
                               max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "adam",
         "n_epochs": 200,
         "batch_size": 128,

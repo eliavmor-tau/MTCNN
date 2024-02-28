@@ -34,10 +34,12 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
     }
 
     def lr_step(epoch):
-        if epoch <= 1000:
+        if epoch <= 10:
             return 1.0
-        else:
+        elif epoch <= 50:
             return 0.1
+        else:
+            return 0.01
 
     optimizer = load_optimizer(optimizer_name=train_params.get("optimizer"),
                                optimizer_params=optimizer_params)
