@@ -14,11 +14,19 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    # checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
-    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    # checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
+
+    pnet2 = PNet()
+    # Load the checkpoint
+    # checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_100.pth')
+    # Load the model state dictionary
+    pnet2.load_state_dict(checkpoint)
+    pnet2.eval()
     resize = Resize(size=(12, 12), antialias=True)
     dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
@@ -37,7 +45,16 @@ def test_propose_net():
             bbox[0][3] = bbox[0][3] * orig_y / float(12)
             bboxes.append(bbox.detach()[0])
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
-
+        for scaled_im in image_pyramid:
+            scaled_im = resize(scaled_im)
+            out = pnet2(scaled_im)
+            y, bbox = out["y_pred"], out["bbox_pred"]
+            bbox[0][0] = bbox[0][0] * orig_x / float(12)
+            bbox[0][2] = bbox[0][2] * orig_x / float(12)
+            bbox[0][1] = bbox[0][1] * orig_y / float(12)
+            bbox[0][3] = bbox[0][3] * orig_y / float(12)
+            bboxes.append(bbox.detach()[0])
+        plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
 
 def test_residual_net():
     transform = Compose([ToTensor()])
@@ -111,7 +128,7 @@ def run_train_rnet():
 
 
 if __name__ == "__main__":
-    # test_propose_net()
+    test_propose_net()
     # test_residual_net()
     # run_train_rnet()
-    run_train_pnet()
+    # run_train_pnet()
