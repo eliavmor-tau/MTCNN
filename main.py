@@ -113,14 +113,14 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=60, max_crop=180, n=200, n_hard=200, out_size=24)
+                                min_crop=60, max_crop=180, n=20, n_hard=20, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60,
-                              max_crop=180, n=100, n_hard=100, out_size=24)
+                              max_crop=180, n=20, n_hard=20, out_size=24)
 
     train_params = {
         "lr": 1e-2,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 10,
         "batch_size": 128,
     }
     rnet = RNet()
@@ -138,6 +138,9 @@ def run_train_rnet():
         out = pnet(images)
         pred_bboxes = out["bbox_pred"]
         y_pred = out["y_pred"]
+        print("pred_bboxes", pred_bboxes)
+        print("y_pred", y_pred)
+        print("images", images.shape)
         plot_im_with_bbox(images[0], bboxes, title=f"y_pred={y_pred[0].item()}")
 
 
