@@ -113,15 +113,15 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=60, max_crop=180, n=20, n_hard=20, out_size=24)
-    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60,
-                              max_crop=180, n=20, n_hard=20, out_size=24)
+                                min_crop=100, max_crop=180, n=100, n_hard=100, out_size=24)
+    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
+                              max_crop=180, n=100, n_hard=100, out_size=24)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 80,
-        "batch_size": 20,
+        "n_epochs": 200,
+        "batch_size": 64,
     }
     rnet = RNet()
     device = "cuda"
