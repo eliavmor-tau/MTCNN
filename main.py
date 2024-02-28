@@ -59,6 +59,7 @@ def test_propose_net():
             bboxes.append(bbox.detach()[0])
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
 
+
 def test_residual_net():
     transform = Compose([ToTensor()])
 
@@ -134,16 +135,17 @@ def run_train_rnet():
         device = "cpu"
 
     device = torch.device(device=device)
-    train_dataloader = DataLoader(train_dataset, batch_size=1)
+    train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
     rnet.eval()
-    os.makedirs("figures")
+    os.makedirs("figures", exist_ok=True)
     with torch.no_grad():
         for idx, batch in enumerate(train_dataloader):
             images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"train_{idx}.jpg"))
+            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y={y} y_pred={y_pred[0].argmax().item()}",
+                              figname=os.path.join("figures", f"train_{idx}.jpg"))
 
         val_dataloader = DataLoader(val_dataset, batch_size=1)
         for idx, batch in enumerate(val_dataloader):
@@ -151,7 +153,8 @@ def run_train_rnet():
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"val_{idx}.jpg"))
+            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y={y} y_pred={y_pred[0].argmax().item()}",
+                              figname=os.path.join("figures", f"val_{idx}.jpg"))
 
 
 if __name__ == "__main__":
