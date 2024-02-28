@@ -21,7 +21,7 @@ def load_optimizer(optimizer_name, optimizer_params):
     return optimizer
 
 
-def train(net, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu",
+def train(net, train_dataset, val_dataset, train_params, out_dir, lr_step, checkpoint_step=None, device="cpu",
           weights=[1., 0.5], wd=0):
     n_epochs = train_params.get("n_epochs")
     batch_size = train_params.get("batch_size")
@@ -32,12 +32,6 @@ def train(net, train_dataset, val_dataset, train_params, out_dir, checkpoint_ste
         "params": net.parameters(),
         "weight_decay": wd
     }
-
-    def lr_step(epoch):
-        if epoch <= 30:
-            return 1.0
-        else:
-            return 0.1
 
     optimizer = load_optimizer(optimizer_name=train_params.get("optimizer"),
                                optimizer_params=optimizer_params)

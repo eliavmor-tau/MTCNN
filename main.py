@@ -51,12 +51,12 @@ def test_residual_net():
 
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_150.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_10.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     resize = Resize(size=(24, 24), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -72,7 +72,7 @@ def test_residual_net():
             bbox[0][1] = bbox[0][1] * orig_y
             bbox[0][3] = bbox[0][3] * orig_y
             bboxes.append(bbox.detach()[0])
-        plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
+        plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.2)
 
 
 def run_train_pnet():
@@ -102,49 +102,60 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=100, max_crop=180, n=10000, n_hard=0, out_size=24)
+                                min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
                               max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
-        "lr": 1e-3,
+        "lr": 1,
         "optimizer": "adam",
         "n_epochs": 100,
         "batch_size": 128,
     }
     rnet = RNet()
     device = "cuda"
+
+    def lr_step(epoch):
+        if epoch <= 5:
+            return 1.0
+        elif epoch <= 10:
+            return 1e-2
+        elif epoch <= 30:
+            return 1e-3
+        else:
+            return 1e-4
+
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training", checkpoint_step=10, device=device, weights=[1.0, 0.5], wd=0)
+          out_dir="rnet_training_2", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 0.5], wd=1e-2)
 
-    if device == "cuda" and not torch.cuda.is_available():
-        device = "cpu"
+    # if device == "cuda" and not torch.cuda.is_available():
+    #     device = "cpu"
 
-    device = torch.device(device=device)
-    train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
-    rnet.eval()
-    os.makedirs("figures", exist_ok=True)
-    with torch.no_grad():
-        for idx, batch in enumerate(train_dataloader):
-            images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-            out = rnet(images)
-            pred_bboxes = out["bbox_pred"]
-            y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y={y} y_pred={y_pred[0].argmax().item()}",
-                              figname=os.path.join("figures", f"train_{idx}.jpg"))
-
-        val_dataloader = DataLoader(val_dataset, batch_size=1)
-        for idx, batch in enumerate(val_dataloader):
-            images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-            out = rnet(images)
-            pred_bboxes = out["bbox_pred"]
-            y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y={y} y_pred={y_pred[0].argmax().item()}",
-                              figname=os.path.join("figures", f"val_{idx}.jpg"))
+    # device = torch.device(device=device)
+    # train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
+    # rnet.eval()
+    # os.makedirs("figures", exist_ok=True)
+    # with torch.no_grad():
+    #     for idx, batch in enumerate(train_dataloader):
+    #         images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
+    #         out = rnet(images)
+    #         pred_bboxes = out["bbox_pred"]
+    #         y_pred = out["y_pred"]
+    #         plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y={y} y_pred={y_pred[0].argmax().item()}",
+    #                           figname=os.path.join("figures", f"train_{idx}.jpg"))
+    #
+    #     val_dataloader = DataLoader(val_dataset, batch_size=1)
+    #     for idx, batch in enumerate(val_dataloader):
+    #         images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
+    #         out = rnet(images)
+    #         pred_bboxes = out["bbox_pred"]
+    #         y_pred = out["y_pred"]
+    #         plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y={y} y_pred={y_pred[0].argmax().item()}",
+    #                           figname=os.path.join("figures", f"val_{idx}.jpg"))
 
 
 if __name__ == "__main__":
     # test_propose_net()
-    # test_residual_net()
+    test_residual_net()
     # run_train_pnet()
-    run_train_rnet()
+    # run_train_rnet()
