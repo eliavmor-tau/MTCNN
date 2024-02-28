@@ -126,7 +126,7 @@ def run_train_rnet():
             return 1e-4
 
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training_2", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 0.5], wd=1e-2)
+          out_dir="rnet_training_2", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=0)
 
     # if device == "cuda" and not torch.cuda.is_available():
     #     device = "cpu"
