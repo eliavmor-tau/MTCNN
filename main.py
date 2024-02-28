@@ -113,9 +113,9 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=60, max_crop=180, n=10, n_hard=10, out_size=24)
+                                min_crop=60, max_crop=180, n=20, n_hard=20, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60,
-                              max_crop=180, n=10, n_hard=10, out_size=24)
+                              max_crop=180, n=20, n_hard=20, out_size=24)
 
     train_params = {
         "lr": 1e-3,
@@ -133,20 +133,22 @@ def run_train_rnet():
 
     device = torch.device(device=device)
     train_dataloader = DataLoader(train_dataset, batch_size=1)
-    for batch in train_dataloader:
-        images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-        out = rnet(images)
-        pred_bboxes = out["bbox_pred"]
-        y_pred = out["y_pred"]
-        plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}")
+    rnet.eval()
+    with torch.no_grad():
+        for batch in train_dataloader:
+            images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
+            out = rnet(images)
+            pred_bboxes = out["bbox_pred"]
+            y_pred = out["y_pred"]
+            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}")
 
-    val_dataloader = DataLoader(val_dataset, batch_size=1)
-    for batch in val_dataloader:
-        images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-        out = rnet(images)
-        pred_bboxes = out["bbox_pred"]
-        y_pred = out["y_pred"]
-        plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}")
+        val_dataloader = DataLoader(val_dataset, batch_size=1)
+        for batch in val_dataloader:
+            images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
+            out = rnet(images)
+            pred_bboxes = out["bbox_pred"]
+            y_pred = out["y_pred"]
+            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}")
 
 
 if __name__ == "__main__":
