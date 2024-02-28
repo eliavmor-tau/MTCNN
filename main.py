@@ -49,12 +49,12 @@ def test_propose_net():
 def test_residual_net():
     transform = Compose([ToTensor()])
 
-    pnet = RNet()
+    rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_150.pth')
     # Load the model state dictionary
-    pnet.load_state_dict(checkpoint)
-    pnet.eval()
+    rnet.load_state_dict(checkpoint)
+    rnet.eval()
     resize = Resize(size=(24, 24), antialias=True)
     dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
@@ -65,12 +65,12 @@ def test_residual_net():
         orig_x, orig_y = im.shape[3], im.shape[2]
         for scaled_im in image_pyramid:
             scaled_im = resize(scaled_im)
-            out = pnet(scaled_im)
+            out = rnet(scaled_im)
             y, bbox = out["y_pred"], out["bbox_pred"]
-            bbox[0][0] = bbox[0][0] * orig_x / float(12)
-            bbox[0][2] = bbox[0][2] * orig_x / float(12)
-            bbox[0][1] = bbox[0][1] * orig_y / float(12)
-            bbox[0][3] = bbox[0][3] * orig_y / float(12)
+            bbox[0][0] = bbox[0][0] * orig_x
+            bbox[0][2] = bbox[0][2] * orig_x
+            bbox[0][1] = bbox[0][1] * orig_y
+            bbox[0][3] = bbox[0][3] * orig_y
             bboxes.append(bbox.detach()[0])
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
 
@@ -102,15 +102,15 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=100, max_crop=180, n=20000, n_hard=2000, out_size=24)
+                                min_crop=100, max_crop=180, n=10000, n_hard=0, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
-                              max_crop=180, n=2000, n_hard=0, out_size=24)
+                              max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
         "n_epochs": 100,
-        "batch_size": 64,
+        "batch_size": 128,
     }
     rnet = RNet()
     device = "cuda"
