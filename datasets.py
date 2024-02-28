@@ -149,7 +149,7 @@ class RNetDataset(Dataset):
         crop_size = [im.shape[1], im.shape[1]]
         im = self.resize_transform(im)
         # bbox = torch.round(bbox * self.out_size / crop_size[0])
-        bbox = torch.round(bbox * 1 / crop_size[0])
+        bbox = bbox * 1.0 / crop_size[0]
         return im, bbox
 
     def __generate_hard_samples(self, label: bool):
@@ -171,7 +171,7 @@ class RNetDataset(Dataset):
             if pnet_label != int(label):
                 im = self.resize_transform(im)
                 # bbox = torch.round(bbox * self.out_size / crop_size[0])
-                bbox = torch.round(bbox * 1 / crop_size[0])
+                bbox = bbox * 1 / crop_size[0]
                 break
         return im, bbox
 
