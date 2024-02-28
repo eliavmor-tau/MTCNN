@@ -36,7 +36,7 @@ def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou
         plt.savefig(figname)
     else:
         plt.show()
-    # plt.close()
+    plt.close()
 
 
 def make_image_pyramid(im, min_pyramid_size=12, reduction_factor=0.9):

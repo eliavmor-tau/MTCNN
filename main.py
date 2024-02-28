@@ -115,14 +115,14 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=100, max_crop=180, n=20, n_hard=20, out_size=24)
+                                min_crop=100, max_crop=180, n=40, n_hard=0, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
-                              max_crop=180, n=20, n_hard=20, out_size=24)
+                              max_crop=180, n=40, n_hard=0, out_size=24)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 600,
         "batch_size": 64,
     }
     rnet = RNet()
@@ -136,7 +136,7 @@ def run_train_rnet():
     device = torch.device(device=device)
     train_dataloader = DataLoader(train_dataset, batch_size=1)
     rnet.eval()
-    os.makedirs("figures")
+    os.makedirs("figures", exist_ok=True)
     with torch.no_grad():
         for idx, batch in enumerate(train_dataloader):
             images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
