@@ -107,7 +107,7 @@ def run_train_rnet():
                               max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
-        "lr": 1,
+        "lr": 1e-3,
         "optimizer": "adam",
         "n_epochs": 100,
         "batch_size": 128,
@@ -116,17 +116,13 @@ def run_train_rnet():
     device = "cuda"
 
     def lr_step(epoch):
-        if epoch <= 5:
-            return 1.0
-        elif epoch <= 10:
-            return 1e-2
-        elif epoch <= 30:
-            return 1e-3
+        if epoch <= 30:
+            return 1
         else:
-            return 1e-4
+            return 0.1
 
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training_2", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 0.5], wd=1e-2)
+          out_dir="rnet_training_2", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=0)
 
     # if device == "cuda" and not torch.cuda.is_available():
     #     device = "cpu"
