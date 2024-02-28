@@ -2,7 +2,7 @@ import numpy as np
 from model import PNet, RNet
 from datasets import PNetDataset, FacesDataSet, RNetDataset
 from torchvision.transforms import ToTensor, Compose, Resize
-from trainer import train_pnet
+from trainer import train
 import torch
 from utils import plot_im_with_bbox, make_image_pyramid
 from torch.utils.data import DataLoader
@@ -103,8 +103,8 @@ def run_train_pnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
 
-    train_pnet(pnet=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="pnet_training_2", checkpoint_step=10, device="cuda", wd=1e-3)
+    train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
+          out_dir="pnet_training_2", checkpoint_step=10, device="cuda", wd=1e-3)
 
 
 def run_train_rnet():
@@ -113,20 +113,20 @@ def run_train_rnet():
     checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=60, max_crop=180, n=20, n_hard=20, out_size=24)
+                                min_crop=60, max_crop=180, n=10, n_hard=10, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=60,
-                              max_crop=180, n=20, n_hard=20, out_size=24)
+                              max_crop=180, n=10, n_hard=10, out_size=24)
 
     train_params = {
-        "lr": 1e-2,
+        "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 10,
-        "batch_size": 128,
+        "n_epochs": 80,
+        "batch_size": 20,
     }
     rnet = RNet()
     device = "cuda"
-    train_pnet(pnet=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-               out_dir="rnet_training", checkpoint_step=10, device=device, weights=[1.0, 0.5], wd=0)
+    train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
+          out_dir="rnet_training", checkpoint_step=10, device=device, weights=[1.0, 0.5], wd=0)
 
     if device == "cuda" and not torch.cuda.is_available():
         device = "cpu"
@@ -135,14 +135,18 @@ def run_train_rnet():
     train_dataloader = DataLoader(train_dataset, batch_size=1)
     for batch in train_dataloader:
         images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-        out = pnet(images)
+        out = rnet(images)
         pred_bboxes = out["bbox_pred"]
         y_pred = out["y_pred"]
-        print("pred_bboxes", pred_bboxes)
-        print("y_pred", y_pred)
-        print("images", images.shape)
-        plot_im_with_bbox(images[0], bboxes, title=f"y_pred={y_pred[0].item()}")
+        plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}")
 
+    val_dataloader = DataLoader(val_dataset, batch_size=1)
+    for batch in val_dataloader:
+        images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
+        out = rnet(images)
+        pred_bboxes = out["bbox_pred"]
+        y_pred = out["y_pred"]
+        plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}")
 
 
 if __name__ == "__main__":

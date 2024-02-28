@@ -21,25 +21,23 @@ def load_optimizer(optimizer_name, optimizer_params):
     return optimizer
 
 
-def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu",
-               weights=[1., 0.5], wd=0):
+def train(net, train_dataset, val_dataset, train_params, out_dir, checkpoint_step=None, device="cpu",
+          weights=[1., 0.5], wd=0):
     n_epochs = train_params.get("n_epochs")
     batch_size = train_params.get("batch_size")
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
     val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
     optimizer_params = {
         "lr": train_params.get("lr"),
-        "params": pnet.parameters(),
+        "params": net.parameters(),
         "weight_decay": wd
     }
 
     def lr_step(epoch):
-        if epoch <= 10:
+        if epoch <= 50:
             return 1.0
-        elif epoch <= 50:
-            return 0.1
         else:
-            return 0.01
+            return 0.1
 
     optimizer = load_optimizer(optimizer_name=train_params.get("optimizer"),
                                optimizer_params=optimizer_params)
@@ -55,7 +53,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
         device = "cpu"
 
     device = torch.device(device=device)
-    pnet.to(device)
+    net.to(device)
     print(f"Training on {device}")
 
     for epoch in tqdm(range(n_epochs), desc=f"epochs", total=n_epochs):
@@ -63,7 +61,7 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
         train_detection_loss, train_bbox_loss, train_loss = 0, 0, 0
         for batch in train_dataloader:
             images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-            out = pnet(images)
+            out = net(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
             l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
@@ -83,14 +81,14 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
         current_lr = lr_scheduler.get_last_lr()[0]
         train_logger.write(line=[epoch, train_detection_loss, train_bbox_loss, train_loss, current_lr])
         if checkpoint_step is not None and (epoch % checkpoint_step) == 0:
-            train_logger.save_model(model=pnet, checkpoint_name=f"checkpoint_epoch_{epoch}.pth")
+            train_logger.save_model(model=net, checkpoint_name=f"checkpoint_epoch_{epoch}.pth")
 
         # validation epoch
         with torch.no_grad():
             val_detection_loss, val_bbox_loss, val_loss = 0, 0, 0
             for batch in val_dataloader:
                 images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-                out = pnet(images)
+                out = net(images)
                 pred_bboxes = out["bbox_pred"]
                 y_pred = out["y_pred"]
                 l_bbox = bbox_loss(input=pred_bboxes, target=bboxes, reduction="mean")
@@ -115,4 +113,4 @@ def train_pnet(pnet, train_dataset, val_dataset, train_params, out_dir, checkpoi
             print(f"val_bbox_loss={val_bbox_loss}")
             print("-" * 25)
 
-    train_logger.save_model(model=pnet, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
+    train_logger.save_model(model=net, checkpoint_name=f"last_epoch_checkpoint_{n_epochs}.pth")
