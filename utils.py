@@ -8,7 +8,7 @@ from torchvision.ops import box_iou
 from torchvision.ops import nms
 
 
-def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou_threshold: float = 0.6, title=""):
+def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou_threshold: float = 0.6, title="", figname=""):
     if im.shape[0] == 3 and im.shape[2] != 3:
         im = np.transpose(im, axes=(1, 2, 0))
     fig, axis = plt.subplots()
@@ -32,7 +32,10 @@ def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou
     #                             facecolor='none')
     #     axis.add_patch(rec)
     plt.imshow(im)
-    plt.show()
+    if figname:
+        plt.savefig(figname)
+    else:
+        plt.show()
     # plt.close()
 
 

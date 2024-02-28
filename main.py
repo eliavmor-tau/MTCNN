@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from model import PNet, RNet
 from datasets import PNetDataset, FacesDataSet, RNetDataset
@@ -134,21 +136,22 @@ def run_train_rnet():
     device = torch.device(device=device)
     train_dataloader = DataLoader(train_dataset, batch_size=1)
     rnet.eval()
+    os.makedirs("figures")
     with torch.no_grad():
-        for batch in train_dataloader:
+        for idx, batch in enumerate(train_dataloader):
             images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}")
+            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"train_{idx}.jpg"))
 
         val_dataloader = DataLoader(val_dataset, batch_size=1)
-        for batch in val_dataloader:
+        for idx, batch in enumerate(val_dataloader):
             images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}")
+            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"val_{idx}.jpg"))
 
 
 if __name__ == "__main__":
