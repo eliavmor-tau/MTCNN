@@ -98,7 +98,7 @@ def run_train_pnet():
         "batch_size": 128,
     }
     pnet = PNet()
-    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_100.pth')
     # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
     pnet.load_state_dict(checkpoint)
 
