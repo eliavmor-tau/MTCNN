@@ -32,7 +32,8 @@ def plot_im_with_bbox(im: Tensor, bboxes: list, scores: [list, None] = None, iou
     #                             facecolor='none')
     #     axis.add_patch(rec)
     plt.imshow(im)
-    plt.show()
+    n = np.random.randint(100000)
+    plt.savefig(f"{n}.jpg")
     plt.close()
 
 
