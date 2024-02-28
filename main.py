@@ -123,7 +123,7 @@ def run_train_rnet():
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 600,
+        "n_epochs": 200,
         "batch_size": 64,
     }
     rnet = RNet()
