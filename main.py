@@ -143,7 +143,7 @@ def run_train_rnet():
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"train y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"train_{idx}.jpg"))
+            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"train_{idx}.jpg"))
 
         val_dataloader = DataLoader(val_dataset, batch_size=1)
         for idx, batch in enumerate(val_dataloader):
@@ -151,7 +151,7 @@ def run_train_rnet():
             out = rnet(images)
             pred_bboxes = out["bbox_pred"]
             y_pred = out["y_pred"]
-            plot_im_with_bbox(images[0], [pred_bboxes[0]], title=f"val y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"val_{idx}.jpg"))
+            plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y_pred={y_pred[0].argmax().item()}", figname=os.path.join("figures", f"val_{idx}.jpg"))
 
 
 if __name__ == "__main__":

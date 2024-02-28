@@ -65,6 +65,7 @@ class PNetDataset(Dataset):
         im, bbox = self.__random_crop_image_and_bbox(im, bbox, label, crop_size)
         im = self.resize_transform(im)
         bbox = torch.round(bbox * self.out_size / crop_size[0])
+        # bbox = torch.round(bbox * 1 / crop_size[0])
         return im, bbox
 
     def __create_data(self):
@@ -147,7 +148,8 @@ class RNetDataset(Dataset):
         im, bbox = self.__random_crop_image_and_bbox(im, bbox, label, crop_size)
         crop_size = [im.shape[1], im.shape[1]]
         im = self.resize_transform(im)
-        bbox = torch.round(bbox * self.out_size / crop_size[0])
+        # bbox = torch.round(bbox * self.out_size / crop_size[0])
+        bbox = torch.round(bbox * 1 / crop_size[0])
         return im, bbox
 
     def __generate_hard_samples(self, label: bool):
@@ -167,13 +169,9 @@ class RNetDataset(Dataset):
             pnet_out = self.pnet(pnet_im)
             pnet_label, pnet_bbox = pnet_out["y_pred"][0].argmax(), pnet_out["bbox_pred"]
             if pnet_label != int(label):
-                # print("hard found hard sample")
-                # print("bbox", bbox * 12 / crop_size[0])
-                # print("pnet_bbox[0]", pnet_bbox[0])
-                # plot_im_with_bbox(pnet_im[0], [pnet_bbox[0], bbox * 12 / crop_size[0]],
-                #                   title=f"hard example pnet_label={pnet_label} expected_label={label}", iou_threshold=0)
                 im = self.resize_transform(im)
-                bbox = torch.round(bbox * self.out_size / crop_size[0])
+                # bbox = torch.round(bbox * self.out_size / crop_size[0])
+                bbox = torch.round(bbox * 1 / crop_size[0])
                 break
         return im, bbox
 
