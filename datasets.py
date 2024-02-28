@@ -34,7 +34,7 @@ class PNetDataset(Dataset):
         self.resize_transform = Resize(out_size, antialias=True)
         self.data_split = data_partition[data_partition['partition'] == partition].image_name
         self.transform = transform
-        self.n = min(n, len(self.data_split))
+        self.n = n
         self.labels = []
         self.bboxes = []
         self.images = []
@@ -116,8 +116,8 @@ class RNetDataset(Dataset):
         self.data_split = data_partition[data_partition['partition'] == partition].image_name
         self.transform = transform
         print(f"len(self.data_split) = {len(self.data_split)}")
-        self.n = min(n, len(self.data_split))
-        self.n_hard = min(n_hard, len(self.data_split))
+        self.n = n
+        self.n_hard = n_hard
         self.labels = []
         self.bboxes = []
         self.images = []

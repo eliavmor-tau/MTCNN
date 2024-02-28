@@ -16,21 +16,14 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
     # checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
 
-    pnet2 = PNet()
-    # Load the checkpoint
-    # checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
-    checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_100.pth')
-    # Load the model state dictionary
-    pnet2.load_state_dict(checkpoint)
-    pnet2.eval()
     resize = Resize(size=(12, 12), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -41,21 +34,14 @@ def test_propose_net():
             scaled_im = resize(scaled_im)
             out = pnet(scaled_im)
             y, bbox = out["y_pred"], out["bbox_pred"]
-            bbox[0][0] = bbox[0][0] * orig_x / float(12)
-            bbox[0][2] = bbox[0][2] * orig_x / float(12)
-            bbox[0][1] = bbox[0][1] * orig_y / float(12)
-            bbox[0][3] = bbox[0][3] * orig_y / float(12)
-            bboxes.append(bbox.detach()[0])
-        plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
-        bboxes = []
-        for scaled_im in image_pyramid:
-            scaled_im = resize(scaled_im)
-            out = pnet2(scaled_im)
-            y, bbox = out["y_pred"], out["bbox_pred"]
-            bbox[0][0] = bbox[0][0] * orig_x / float(12)
-            bbox[0][2] = bbox[0][2] * orig_x / float(12)
-            bbox[0][1] = bbox[0][1] * orig_y / float(12)
-            bbox[0][3] = bbox[0][3] * orig_y / float(12)
+            # bbox[0][0] = bbox[0][0] * orig_x / float(12)
+            # bbox[0][2] = bbox[0][2] * orig_x / float(12)
+            # bbox[0][1] = bbox[0][1] * orig_y / float(12)
+            # bbox[0][3] = bbox[0][3] * orig_y / float(12)
+            bbox[0][0] = bbox[0][0] * orig_x
+            bbox[0][2] = bbox[0][2] * orig_x
+            bbox[0][1] = bbox[0][1] * orig_y
+            bbox[0][3] = bbox[0][3] * orig_y
             bboxes.append(bbox.detach()[0])
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.6)
 
@@ -113,17 +99,17 @@ def run_train_pnet():
 def run_train_rnet():
     transform = Compose([ToTensor()])
     pnet = PNet()
-    checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
+    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=100, max_crop=180, n=40, n_hard=0, out_size=24)
+                                min_crop=100, max_crop=180, n=20000, n_hard=2000, out_size=24)
     val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
-                              max_crop=180, n=40, n_hard=0, out_size=24)
+                              max_crop=180, n=2000, n_hard=0, out_size=24)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 100,
         "batch_size": 64,
     }
     rnet = RNet()
@@ -160,5 +146,5 @@ def run_train_rnet():
 if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
-    run_train_pnet()
-    # run_train_rnet()
+    # run_train_pnet()
+    run_train_rnet()
