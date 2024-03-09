@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-from model import PNet, RNet
-from datasets import PNetDataset, FacesDataSet, RNetDataset
+from model import PNet, RNet, ONet
+from datasets import PNetDataset, FacesDataSet, RNetDataset, ONetDataset
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train
 import torch
@@ -51,12 +51,12 @@ def test_residual_net():
 
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_10.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     resize = Resize(size=(24, 24), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="val", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -150,8 +150,43 @@ def run_train_rnet():
     #                           figname=os.path.join("figures", f"val_{idx}.jpg"))
 
 
+def run_train_onet():
+    transform = Compose([ToTensor()])
+    rnet = RNet()
+    # Load the checkpoint
+    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
+    # Load the model state dictionary
+    rnet.load_state_dict(checkpoint)
+    rnet.eval()
+    train_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="train", transform=transform,
+                                # min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
+                                min_crop=40, max_crop=200, n=100, n_hard=0, out_size=48)
+    val_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="val", transform=transform, min_crop=40,
+                              # max_crop=200, n=1000, n_hard=0, out_size=48)
+                              max_crop=200, n=100, n_hard=0, out_size=48)
+
+    train_params = {
+        "lr": 1e-3,
+        "optimizer": "adam",
+        "n_epochs": 100,
+        "batch_size": 128,
+    }
+    onet = ONet()
+    device = "cuda"
+
+    def lr_step(epoch):
+        if epoch <= 30:
+            return 1
+        else:
+            return 0.1
+
+    train(net=onet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
+          out_dir="onet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+
+
 if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
     # run_train_pnet()
-    run_train_rnet()
+    # run_train_rnet()
+    run_train_onet()
