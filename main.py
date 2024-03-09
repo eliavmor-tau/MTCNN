@@ -159,11 +159,9 @@ def run_train_onet():
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     train_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="train", transform=transform,
-                                # min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
-                                min_crop=40, max_crop=200, n=100, n_hard=0, out_size=48)
+                                min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
     val_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="val", transform=transform, min_crop=40,
-                              # max_crop=200, n=1000, n_hard=0, out_size=48)
-                              max_crop=200, n=100, n_hard=0, out_size=48)
+                              max_crop=200, n=1000, n_hard=0, out_size=48)
 
     train_params = {
         "lr": 1e-3,
