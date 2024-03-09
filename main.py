@@ -75,6 +75,35 @@ def test_residual_net():
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.2)
 
 
+def test_onet():
+    transform = Compose([ToTensor()])
+
+    onet = ONet()
+    # Load the checkpoint
+    checkpoint = torch.load('onet_training/checkpoint/checkpoint_epoch_30.pth')
+    # Load the model state dictionary
+    onet.load_state_dict(checkpoint)
+    onet.eval()
+    resize = Resize(size=(48, 48), antialias=True)
+    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataloader = DataLoader(dataset=dataset, batch_size=1)
+
+    for im in dataloader:
+        image_pyramid = make_image_pyramid(im)
+        bboxes = []
+        orig_x, orig_y = im.shape[3], im.shape[2]
+        for scaled_im in image_pyramid:
+            scaled_im = resize(scaled_im)
+            out = onet(scaled_im)
+            y, bbox = out["y_pred"], out["bbox_pred"]
+            bbox[0][0] = bbox[0][0] * orig_x
+            bbox[0][2] = bbox[0][2] * orig_x
+            bbox[0][1] = bbox[0][1] * orig_y
+            bbox[0][3] = bbox[0][3] * orig_y
+            bboxes.append(bbox.detach()[0])
+        plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=0.2)
+
+
 def run_train_pnet():
     transform = Compose([ToTensor()])
     train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
@@ -185,6 +214,7 @@ def run_train_onet():
 if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
+    test_onet()
     # run_train_pnet()
     # run_train_rnet()
-    run_train_onet()
+    # run_train_onet()
