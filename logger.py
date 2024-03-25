@@ -5,11 +5,13 @@ import torch
 
 
 class Logger:
+    LOGS_DIR = "logs"
+    CHECKPOINT_DIR = "checkpoint"
 
     def __init__(self, out_dir, header, log_name):
         self.out_dir = out_dir
-        self.checkpoint_dir = os.path.join(out_dir, "checkpoint")
-        self.log_dir = os.path.join(out_dir, "logs")
+        self.checkpoint_dir = os.path.join(out_dir, Logger.CHECKPOINT_DIR)
+        self.log_dir = os.path.join(out_dir, Logger.LOGS_DIR)
         self.log_name = log_name
         self.log_path = os.path.join(self.log_dir, f"{self.log_name}.csv")
         self.header = header

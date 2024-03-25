@@ -5,7 +5,7 @@ from torch.optim import Adam, SGD
 from torch.optim.lr_scheduler import StepLR, LambdaLR
 from torch.nn.functional import cross_entropy, mse_loss
 from logger import Logger
-from utils import plot_im_with_bbox
+
 
 OPTIMIZERS = {
     "sgd": SGD,

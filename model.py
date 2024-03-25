@@ -2,7 +2,7 @@ from torch import nn
 
 
 class PNet(nn.Module):
-    
+
     def __init__(self):
         super(PNet, self).__init__()
         # Define P-Net architecture
@@ -83,6 +83,7 @@ class ONet(nn.Module):
 
         # Bounding box regression layer
         self.linear0_0 = nn.Linear(in_features=256, out_features=4)
+
         # Classification layer
         self.linear0_1 = nn.Linear(in_features=256, out_features=2)
 

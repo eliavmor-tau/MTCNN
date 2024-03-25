@@ -379,4 +379,4 @@ if __name__ == "__main__":
                           out_size=48, n=20, n_hard=20)
     for i in range(len(dataset)):
         im, bbox, label = dataset[i]
-        plot_im_with_bbox(im, [bbox* 48], title=f"image={i} label={label}")
+        plot_im_with_bbox(im, [bbox * 48], title=f"image={i} label={label}")
