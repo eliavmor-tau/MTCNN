@@ -125,8 +125,6 @@ def test():
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
-        # fig, axis = plt.subplots()
-        # axis.imshow(np.transpose(im[0], axes=(1, 2, 0)))
         final_bboxes, final_scores = [], []
         image_pyramid = make_image_pyramid(im)
         orig_x, orig_y = im.shape[3], im.shape[2]
@@ -151,20 +149,12 @@ def test():
             bboxes_indices = nms(boxes=pnet_bboxes, scores=pnet_scores, iou_threshold=0.3)
             pnet_bboxes = [pnet_bboxes[index] for index in bboxes_indices]
             pnet_scores = torch.tensor([pnet_scores[index] for index in bboxes_indices])
-            # plot_im_with_bbox(im[0], bboxes=pnet_bboxes, scores=pnet_scores, iou_threshold=0.3)
             for bbox in pnet_bboxes:
                 x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
                 x = torch.clip(x, min=0, max=orig_x)
                 y = torch.clip(y, min=0, max=orig_y)
                 pnet_candidates.append(im[:, :, y: y + h, x: x + w])
                 pnet_candidates_params.append((x, y, w, h))
-                # rec = patches.Rectangle(xy=(bbox[0], bbox[1]), width=bbox[2], height=bbox[3], linewidth=2,
-                #                         edgecolor='blue',
-                #                         facecolor='none')
-                # axis.add_patch(rec)
-                # plt.imshow(np.transpose(pnet_candidates[-1][0], axes=(1, 2, 0)))
-                # plt.show()
-                # plt.close()
 
             for pnet_candidate_idx, pnet_candidate in enumerate(pnet_candidates):
                 rnet_candidates, rnet_candidates_params, rnet_bboxes, rnet_scores = [], [], [], []
@@ -190,16 +180,11 @@ def test():
                     bboxes_indices = nms(boxes=rnet_bboxes, scores=rnet_scores, iou_threshold=0.3)
                     rnet_bboxes = [rnet_bboxes[index] for index in bboxes_indices]
                     rnet_scores = torch.tensor([rnet_scores[index] for index in bboxes_indices])
-                    # plot_im_with_bbox(pnet_candidate[0], bboxes=rnet_bboxes, scores=rnet_scores, iou_threshold=0.3)
                     yx_offset = pnet_candidates_params[pnet_candidate_idx]
                     for bbox in rnet_bboxes:
                         x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
                         rnet_candidates.append(pnet_candidate[:, :, y: y + h, x: x + w])
                         rnet_candidates_params.append((x + yx_offset[0], y + yx_offset[1], w, h))
-                        # rec = patches.Rectangle(xy=(x + yx_offset[0], y + yx_offset[1]), width=bbox[2], height=bbox[3], linewidth=2,
-                        #                         edgecolor='green',
-                        #                         facecolor='none')
-                        # axis.add_patch(rec)
 
                     for rnet_candidate_idx, rnet_candidate in enumerate(rnet_candidates):
                         onet_candidates_offsets, onet_bboxes, onet_scores = [], [], []
@@ -225,19 +210,13 @@ def test():
                             bboxes_indices = nms(boxes=onet_bboxes, scores=onet_scores, iou_threshold=0.3)
                             onet_bboxes = [onet_bboxes[index] for index in bboxes_indices]
                             onet_scores = torch.tensor([onet_scores[index] for index in bboxes_indices])
-                            # plot_im_with_bbox(rnet_candidate[0], bboxes=onet_bboxes, scores=onet_scores,
-                            #                   iou_threshold=0.3)
                             yx_offset = rnet_candidates_params[rnet_candidate_idx]
                             for idx, bbox in enumerate(onet_bboxes):
                                 x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
                                 onet_candidates_offsets.append((x + yx_offset[0], y + yx_offset[1], w, h))
                                 final_bboxes.append(torch.tensor([x + yx_offset[0], y + yx_offset[1], w, h]).float())
                                 final_scores.append(onet_scores[idx])
-                                # rec = patches.Rectangle(xy=(x + yx_offset[0], y + yx_offset[1]), width=bbox[2],
-                                #                         height=bbox[3], linewidth=2,
-                                #                         edgecolor='red',
-                                #                         facecolor='none')
-                                # axis.add_patch(rec)
+
         final_scores = torch.tensor(final_scores).float()
         plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
@@ -358,7 +337,7 @@ if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
     # test_onet()
-    test()
-    # run_train_pnet()
+    # test()
+    run_train_pnet()
     # run_train_rnet()
     # run_train_onet()

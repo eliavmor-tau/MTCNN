@@ -1,9 +1,251 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="75b713d8-478d-4e8b-afe2-b7c380dc633a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/checkpoint/last_epoch_checkpoint_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/onet_training/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_110.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_120.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_130.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_140.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_150.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_160.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_170.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_180.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_190.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/checkpoint/last_epoch_checkpoint_200.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_110.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_120.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_130.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_140.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_150.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_160.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_170.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_180.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_190.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/last_epoch_checkpoint_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_2/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_110.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_120.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_130.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_140.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_150.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_160.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_170.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_180.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_190.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnet_training_3/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_110.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_120.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_130.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_140.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_150.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_160.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_170.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_180.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_190.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/checkpoint/last_epoch_checkpoint_200.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_2/logs/val_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_0.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_10.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_20.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_30.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_40.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_60.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_70.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_80.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/checkpoint_epoch_90.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/checkpoint/last_epoch_checkpoint_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/logs/train_log.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rnet_training_3/logs/val_log.csv" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2eMN0c6bIRZfq7YM5TPx87i5NWF" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "last_opened_file_path": "/Users/eliav/Documents/GitHub/MTCNN/MTCNN"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="MTCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/Library/Frameworks/Python.framework/Versions/3.9/bin/python3" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="MTCNN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/Library/Frameworks/Python.framework/Versions/3.9/bin/python3" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="75b713d8-478d-4e8b-afe2-b7c380dc633a" name="Default Changelist" comment="" />
+      <created>1711710264772</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1711710264772</updated>
+      <workItem from="1711710844766" duration="611000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="184" y="109" width="1071" height="702" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1711710647771">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="184" y="109" width="1071" height="702" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1440.900@0.0.1440.900" timestamp="1711710647771" />
+    <state width="1419" height="245" key="GridCell.Tab.0.bottom" timestamp="1711710798315">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1419" height="245" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1711710798315" />
+    <state width="1419" height="245" key="GridCell.Tab.0.center" timestamp="1711710798314">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1419" height="245" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1711710798314" />
+    <state width="1419" height="245" key="GridCell.Tab.0.left" timestamp="1711710798314">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1419" height="245" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1711710798314" />
+    <state width="1419" height="245" key="GridCell.Tab.0.right" timestamp="1711710798314">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1419" height="245" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1711710798314" />
   </component>
 </project>
