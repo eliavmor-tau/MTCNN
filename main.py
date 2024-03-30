@@ -278,25 +278,25 @@ def run_train_onet():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
 
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     train_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=(48, 48))
+                                 min_crop=40, max_crop=200, n=20000, n_hard=4000, out_size=(48, 48))
     val_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                partition="val", transform=transform, min_crop=40,
-                               max_crop=200, n=1000, n_hard=0, out_size=(48, 48))
+                               max_crop=200, n=2000, n_hard=0, out_size=(48, 48))
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 100,
+        "n_epochs": 200,
         "batch_size": 128,
     }
     onet = ONet()
@@ -318,5 +318,5 @@ if __name__ == "__main__":
     # test_onet()
     # test()
     # run_train_pnet()
-    run_train_rnet()
-    # run_train_onet()
+    # run_train_rnet()
+    run_train_onet()
