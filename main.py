@@ -224,9 +224,9 @@ def test():
 def run_train_pnet():
     transform = Compose([ToTensor()])
     train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-                                 n=20000)
+                                 n=20000, n_hard=0)
     val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-                               n=1000)
+                               n=1000, n_hard=0)
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",

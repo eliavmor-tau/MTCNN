@@ -85,15 +85,15 @@ class MTCNNDataset(Dataset):
             if self.transform is not None:
                 im = self.transform(im)
             im, bbox = self.__random_crop_image_and_bbox(im, bbox, label, crop_size)
-
-            previous_net_im = torch.unsqueeze(self.previous_transform(im), 0)
-            previous_net_bbox = torch.round(bbox * self.out_size / crop_size[0])
-            previous_net_out = self.previous_net(previous_net_im)
-            previous_net_label, previous_net_bbox = previous_net_out["y_pred"][0].argmax(), previous_net_out["bbox_pred"]
-            if previous_net_label != int(label):
-                im = self.resize_transform(im)
-                bbox = bbox * 1. / float(crop_size[0])
-                break
+            if self.previous_net is not None:
+                previous_net_im = torch.unsqueeze(self.previous_transform(im), 0)
+                previous_net_bbox = torch.round(bbox * self.out_size / crop_size[0])
+                previous_net_out = self.previous_net(previous_net_im)
+                previous_net_label, previous_net_bbox = previous_net_out["y_pred"][0].argmax(), previous_net_out["bbox_pred"]
+                if previous_net_label != int(label):
+                    im = self.resize_transform(im)
+                    bbox = bbox * 1. / float(crop_size[0])
+                    break
         return im, bbox
 
     def __create_data(self):
