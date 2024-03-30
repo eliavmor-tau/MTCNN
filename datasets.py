@@ -15,7 +15,7 @@ class MTCNNDataset(Dataset):
     def __init__(self, path: str, partition: str, transform=None, neg_th: int = 0.3, pos_th: int = 0.65,
                  min_crop: int = 12, max_crop: int = 100, out_size=24, n=1000, n_hard=1000, previous_net=None,
                  previous_transform=None) -> Dataset:
-        super(ONetDataset, self).__init__()
+        super(MTCNNDataset, self).__init__()
         self.previous_net = previous_net
         self.previous_transform = previous_transform
         self.path = path
