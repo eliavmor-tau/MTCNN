@@ -224,9 +224,11 @@ def test():
 def run_train_pnet():
     transform = Compose([ToTensor()])
     train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-                                 n=20000, n_hard=0)
+                                 # n=20000, n_hard=0, out_size=(12, 12))
+                                 n=10, n_hard=0, out_size=(12, 12))
     val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-                               n=1000, n_hard=0)
+                               # n=1000, n_hard=0, out_size=(12, 12))
+                               n=10, n_hard=0, out_size=(12, 12))
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
@@ -253,10 +255,10 @@ def run_train_rnet():
     pnet.load_state_dict(checkpoint)
     train_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=24)
+                                 min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=(24, 24))
     val_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                partition="val", transform=transform, min_crop=100,
-                               max_crop=180, n=1000, n_hard=0, out_size=24)
+                               max_crop=180, n=1000, n_hard=0, out_size=(24, 24))
 
     train_params = {
         "lr": 1e-3,
@@ -292,10 +294,10 @@ def run_train_onet():
     rnet.eval()
     train_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
+                                 min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=(48, 48))
     val_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                partition="val", transform=transform, min_crop=40,
-                               max_crop=200, n=1000, n_hard=0, out_size=48)
+                               max_crop=200, n=1000, n_hard=0, out_size=(48, 48))
 
     train_params = {
         "lr": 1e-3,

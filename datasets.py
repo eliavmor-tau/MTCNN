@@ -87,7 +87,7 @@ class MTCNNDataset(Dataset):
             im, bbox = self.__random_crop_image_and_bbox(im, bbox, label, crop_size)
             if self.previous_net is not None:
                 previous_net_im = torch.unsqueeze(self.previous_transform(im), 0)
-                previous_net_bbox = torch.round(bbox * self.out_size / crop_size[0])
+                previous_net_bbox = torch.round(bbox * self.out_size[0] / crop_size[0])
                 previous_net_out = self.previous_net(previous_net_im)
                 previous_net_label, previous_net_bbox = previous_net_out["y_pred"][0].argmax(), previous_net_out["bbox_pred"]
                 if previous_net_label != int(label):
