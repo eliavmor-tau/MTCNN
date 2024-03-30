@@ -45,7 +45,7 @@ def test_residual_net():
     transform = Compose([ToTensor()])
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
+    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
@@ -249,10 +249,10 @@ def run_train_rnet():
     pnet.load_state_dict(checkpoint)
     train_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=(24, 24))
+                                 min_crop=100, max_crop=180, n=20000, n_hard=2000, out_size=(24, 24))
     val_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                partition="val", transform=transform, min_crop=100,
-                               max_crop=180, n=1000, n_hard=0, out_size=(24, 24))
+                               max_crop=180, n=2000, n_hard=0, out_size=(24, 24))
 
     train_params = {
         "lr": 1e-3,
