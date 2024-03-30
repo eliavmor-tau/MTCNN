@@ -243,7 +243,7 @@ def run_train_pnet():
 
     device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training_3", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+          out_dir="pnet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
 
 
 def run_train_rnet():
@@ -274,7 +274,7 @@ def run_train_rnet():
             return 0.1
 
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training_3", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+          out_dir="rnet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
 
 
 def run_train_onet():
