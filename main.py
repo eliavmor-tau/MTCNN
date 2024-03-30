@@ -16,8 +16,7 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
-    # checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_100.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
@@ -34,6 +33,7 @@ def test_propose_net():
             scaled_im = resize(scaled_im)
             out = pnet(scaled_im)
             y, bbox = out["y_pred"], out["bbox_pred"]
+            print(bbox)
             # bbox[0][0] = bbox[0][0] * orig_x / float(12)
             # bbox[0][2] = bbox[0][2] * orig_x / float(12)
             # bbox[0][1] = bbox[0][1] * orig_y / float(12)
@@ -224,11 +224,10 @@ def test():
 def run_train_pnet():
     transform = Compose([ToTensor()])
     train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-                                 # n=20000, n_hard=0, out_size=(12, 12))
-                                 n=10, n_hard=0, out_size=(12, 12))
+                                 n=20000, n_hard=0, out_size=(12, 12))
     val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-                               # n=1000, n_hard=0, out_size=(12, 12))
-                               n=10, n_hard=0, out_size=(12, 12))
+                               n=1000, n_hard=0, out_size=(12, 12))
+
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",

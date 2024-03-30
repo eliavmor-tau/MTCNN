@@ -5,7 +5,7 @@ import os
 from utils import random_crop_and_update_bbox, plot_im_with_bbox, IoU
 from PIL import Image
 import numpy as np
-from torchvision.transforms import ToTensor, Resize
+from torchvision.transforms import ToTensor, Resize, Compose
 from tqdm import tqdm
 from model import PNet, RNet
 
@@ -162,23 +162,12 @@ class FacesDataSet(Dataset):
 
 
 if __name__ == "__main__":
-    rnet = RNet()
-    # Load the checkpoint
-    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
-    # Load the model state dictionary
-    rnet.load_state_dict(checkpoint)
-    rnet.eval()
+    transform = Compose([ToTensor()])
 
     # test dataset.
-    # dataset = PNetDataset(path="data/celebA", partition="val",
-    #                       transform=ToTensor(), min_crop=30, max_crop=100,
-    #                       out_size=12, n=100)
-
-    # test dataset.
-    dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="train",
-                          transform=ToTensor(), min_crop=40, max_crop=200,
-                          out_size=48, n=20, n_hard=20)
+    dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
+                                 # n=20000, n_hard=0, out_size=(12, 12))
+                                 n=100, n_hard=0, out_size=(12, 12))
     for i in range(len(dataset)):
         im, bbox, label = dataset[i]
-        plot_im_with_bbox(im, [bbox * 48], title=f"image={i} label={label}")
+        plot_im_with_bbox(im, [bbox * 12], title=f"image={i} label={label}")
