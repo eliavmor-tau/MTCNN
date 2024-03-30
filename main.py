@@ -34,10 +34,6 @@ def test_propose_net():
             out = pnet(scaled_im)
             y, bbox = out["y_pred"], out["bbox_pred"]
             print(bbox)
-            # bbox[0][0] = bbox[0][0] * orig_x / float(12)
-            # bbox[0][2] = bbox[0][2] * orig_x / float(12)
-            # bbox[0][1] = bbox[0][1] * orig_y / float(12)
-            # bbox[0][3] = bbox[0][3] * orig_y / float(12)
             bbox[0][0] = bbox[0][0] * orig_x
             bbox[0][2] = bbox[0][2] * orig_x
             bbox[0][1] = bbox[0][1] * orig_y
@@ -231,7 +227,7 @@ def run_train_pnet():
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 100,
+        "n_epochs": 200,
         "batch_size": 128,
     }
     pnet = PNet()
