@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from model import PNet, RNet, ONet
-from datasets import PNetDataset, FacesDataSet, RNetDataset, ONetDataset
+from datasets import MTCNNDataset, FacesDataSet
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train
 import torch
@@ -223,23 +223,27 @@ def test():
 
 def run_train_pnet():
     transform = Compose([ToTensor()])
-    train_dataset = PNetDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-                                n=10000)
-    val_dataset = PNetDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-                              n=1000)
+    train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
+                                 n=20000)
+    val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
+                               n=1000)
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 100,
         "batch_size": 128,
     }
     pnet = PNet()
-    # checkpoint = torch.load('pnet_training_2/checkpoint/last_epoch_checkpoint_100.pth')
-    # checkpoint = torch.load('pnet_training/checkpoint/checkpoint_epoch_150.pth')
-    # pnet.load_state_dict(checkpoint)
 
+    def lr_step(epoch):
+        if epoch <= 30:
+            return 1
+        else:
+            return 0.1
+
+    device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="pnet_training_3", checkpoint_step=10, device="cuda", wd=1e-3)
+          out_dir="rnet_training_3", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
 
 
 def run_train_rnet():
@@ -247,10 +251,12 @@ def run_train_rnet():
     pnet = PNet()
     checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
-    train_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=24)
-    val_dataset = RNetDataset(pnet=pnet, path="data/celebA", partition="val", transform=transform, min_crop=100,
-                              max_crop=180, n=1000, n_hard=0, out_size=24)
+    train_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
+                                 partition="train", transform=transform,
+                                 min_crop=100, max_crop=180, n=10000, n_hard=1000, out_size=24)
+    val_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
+                               partition="val", transform=transform, min_crop=100,
+                               max_crop=180, n=1000, n_hard=0, out_size=24)
 
     train_params = {
         "lr": 1e-3,
@@ -270,31 +276,6 @@ def run_train_rnet():
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
           out_dir="rnet_training_3", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
 
-    # if device == "cuda" and not torch.cuda.is_available():
-    #     device = "cpu"
-
-    # device = torch.device(device=device)
-    # train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
-    # rnet.eval()
-    # os.makedirs("figures", exist_ok=True)
-    # with torch.no_grad():
-    #     for idx, batch in enumerate(train_dataloader):
-    #         images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-    #         out = rnet(images)
-    #         pred_bboxes = out["bbox_pred"]
-    #         y_pred = out["y_pred"]
-    #         plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"train y={y} y_pred={y_pred[0].argmax().item()}",
-    #                           figname=os.path.join("figures", f"train_{idx}.jpg"))
-    #
-    #     val_dataloader = DataLoader(val_dataset, batch_size=1)
-    #     for idx, batch in enumerate(val_dataloader):
-    #         images, bboxes, y = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-    #         out = rnet(images)
-    #         pred_bboxes = out["bbox_pred"]
-    #         y_pred = out["y_pred"]
-    #         plot_im_with_bbox(images[0], [pred_bboxes[0] * 24], title=f"val y={y} y_pred={y_pred[0].argmax().item()}",
-    #                           figname=os.path.join("figures", f"val_{idx}.jpg"))
-
 
 def run_train_onet():
     transform = Compose([ToTensor()])
@@ -309,10 +290,12 @@ def run_train_onet():
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
-    train_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="train", transform=transform,
-                                min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
-    val_dataset = ONetDataset(rnet=rnet, path="data/celebA", partition="val", transform=transform, min_crop=40,
-                              max_crop=200, n=1000, n_hard=0, out_size=48)
+    train_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
+                                 partition="train", transform=transform,
+                                 min_crop=40, max_crop=200, n=10000, n_hard=1000, out_size=48)
+    val_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
+                               partition="val", transform=transform, min_crop=40,
+                               max_crop=200, n=1000, n_hard=0, out_size=48)
 
     train_params = {
         "lr": 1e-3,
