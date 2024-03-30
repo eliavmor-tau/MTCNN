@@ -16,13 +16,13 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_100.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
 
     resize = Resize(size=(12, 12), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="train", transform=transform)
+    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -33,7 +33,6 @@ def test_propose_net():
             scaled_im = resize(scaled_im)
             out = pnet(scaled_im)
             y, bbox = out["y_pred"], out["bbox_pred"]
-            print(bbox)
             bbox[0][0] = bbox[0][0] * orig_x
             bbox[0][2] = bbox[0][2] * orig_x
             bbox[0][1] = bbox[0][1] * orig_y
@@ -246,7 +245,7 @@ def run_train_pnet():
 def run_train_rnet():
     transform = Compose([ToTensor()])
     pnet = PNet()
-    checkpoint = torch.load('pnet_training_3/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                  partition="train", transform=transform,
@@ -258,7 +257,7 @@ def run_train_rnet():
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 100,
+        "n_epochs": 200,
         "batch_size": 128,
     }
     rnet = RNet()
@@ -318,6 +317,6 @@ if __name__ == "__main__":
     # test_residual_net()
     # test_onet()
     # test()
-    run_train_pnet()
-    # run_train_rnet()
+    # run_train_pnet()
+    run_train_rnet()
     # run_train_onet()
