@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from model import PNet, RNet, ONet
-from datasets import MTCNNDataset, FacesDataSet
+from datasets import MTCNNDataset, FacesDataSet, MTCNNWiderFace
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train
 import torch
@@ -216,6 +216,7 @@ def test():
         final_scores = torch.tensor(final_scores).float()
         plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
+
 def predict_faces_in_image(im):
     pnet = PNet()
     pnet_resize = Resize(size=(12, 12), antialias=True)
@@ -334,30 +335,37 @@ def predict_faces_in_image(im):
         return final_bboxes
         # plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
+
 def run_train_pnet():
     transform = Compose([ToTensor()])
-    train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-                                 n=20000, n_hard=0, out_size=(12, 12))
-    val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-                               n=1000, n_hard=0, out_size=(12, 12))
+    # train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
+    #                              n=20000, n_hard=0, out_size=(12, 12))
+    # val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
+    #                            n=1000, n_hard=0, out_size=(12, 12))
+
+    train_dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3,
+                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
+    val_dataset = MTCNNWiderFace(path="data/wider_face", partition="val", transform=transform, neg_th=0.3,
+                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 20,
         "batch_size": 128,
     }
     pnet = PNet()
 
     def lr_step(epoch):
-        if epoch <= 30:
+        if epoch <= 5:
             return 1
         else:
             return 0.1
 
     device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="pnet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+          out_dir="pnet_training_wider_face", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          wd=1e-3)
 
 
 def run_train_rnet():
@@ -435,12 +443,13 @@ def plot_image_with_bounding_box(image, bounding_boxes, frame_idx):
     for box in bounding_boxes:
         x, y, w, h = round(box[0].item()), round(box[1].item()), round(box[2].item()), round(box[3].item())
         # cv2.rectangle(img=image, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw a green rectangle
-        cv2.rectangle(img=image, pt1=(x, y), pt2=(x+w, y+h), color=(0, 255, 0), thickness=2)
+        cv2.rectangle(img=image, pt1=(x, y), pt2=(x + w, y + h), color=(0, 255, 0), thickness=2)
 
     # Display the image with bounding boxes
     bgr_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     cv2.imshow(f'Frame', bgr_image)
     cv2.waitKey(1)
+
 
 def capture_images(target_fps):
     # Initialize the camera
@@ -487,7 +496,7 @@ if __name__ == "__main__":
     # test_residual_net()
     # test_onet()
     # test()
-    # run_train_pnet()
+    run_train_pnet()
     # run_train_rnet()
     # run_train_onet()
-    capture_images(target_fps=5)
+    # capture_images(target_fps=5)
