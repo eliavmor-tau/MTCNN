@@ -293,6 +293,7 @@ class MTCNNWiderFace(Dataset):
             for box in bboxes:
                 status = False
                 if min(box[2], box[3]) > 80:
+                    tries = 0
                     while not status:
                         pos_example, new_box, status = self.__prepare_pos_example(im, box)
                         if status == True:
@@ -300,6 +301,10 @@ class MTCNNWiderFace(Dataset):
                             self.bboxes.append(new_box)
                             self.labels.append(torch.tensor(1))
                             pos_count += 1
+                        else:
+                            tries += 1
+                        if tries >= 5:
+                            break
                 if pos_count >= self.n // 2:
                     break
             i += 1

@@ -6,8 +6,11 @@ from datasets import MTCNNDataset, FacesDataSet, MTCNNWiderFace
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train
 import torch
-from utils import plot_im_with_bbox, make_image_pyramid, nms
+from utils import plot_im_with_bbox, make_image_pyramid, nms, IoU
 from torch.utils.data import DataLoader
+import matplotlib
+
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import cv2
 
@@ -217,7 +220,35 @@ def test():
         plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
 
-def predict_faces_in_image(im):
+def sliding_window(image, window_size, stride):
+    """
+    Function to generate patches from an image using a sliding window approach.
+
+    Parameters:
+    - image: Input image (numpy array).
+    - window_size: Tuple (w, h) specifying the size of the sliding window.
+    - stride: Stride of the sliding window.
+
+    Returns:
+    - patches: List of patches extracted from the image.
+    """
+
+    patches = []
+    image_height, image_width = image.shape[:2]
+    window_width, window_height = window_size
+
+    for y in range(0, image_height - window_height + 1, stride):
+        for x in range(0, image_width - window_width + 1, stride):
+            patch = image[y:y + window_height, x:x + window_width, :]
+            patches.append((patch, x, y))
+
+    return patches
+
+
+def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction_factor=0.7):
+    if window_size is None:
+        window_size = [(i, i) for i in range(50, 501, 200)]
+
     pnet = PNet()
     pnet_resize = Resize(size=(12, 12), antialias=True)
     checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
@@ -235,105 +266,115 @@ def predict_faces_in_image(im):
     checkpoint = torch.load('onet_training/checkpoint/checkpoint_epoch_30.pth')
     onet.load_state_dict(checkpoint)
     onet.eval()
-
+    image_patches = []
+    for ws in window_size:
+        image_patches += sliding_window(image=im, window_size=ws, stride=min(ws[0] // 2, 100))
     transform = Compose([ToTensor()])
-    im = torch.unsqueeze(transform(im), 0)
     final_bboxes, final_scores = [], []
-    image_pyramid = make_image_pyramid(im)
-    orig_x, orig_y = im.shape[3], im.shape[2]
-    pnet_candidates, pnet_candidates_params, pnet_bboxes, pnet_scores = [], [], [], []
-    for scaled_im in image_pyramid:
-        scaled_im = pnet_resize(scaled_im)
-        out = pnet(scaled_im)
-        y, bbox = out["y_pred"], out["bbox_pred"]
-        y = torch.exp(y)
-        y = y / y.sum()
+    print(len(image_patches))
+    for patch, x0, y0 in image_patches:
+        plt.imshow(patch)
+        plt.savefig(f"debug/test_{x0}_{y0}.jpg")
+        patch = torch.unsqueeze(transform(patch), 0)
+        image_pyramid = make_image_pyramid(patch, min_pyramid_size=min_pyramid_size, reduction_factor=reduction_factor)
+        orig_x, orig_y = patch.shape[3], patch.shape[2]
+        pnet_candidates, pnet_candidates_params, pnet_bboxes, pnet_scores = [], [], [], []
 
-        # if torch.argmax(y) == 1:
-        bbox[0][0] = bbox[0][0] * orig_x
-        bbox[0][2] = bbox[0][2] * orig_x
-        bbox[0][1] = bbox[0][1] * orig_y
-        bbox[0][3] = bbox[0][3] * orig_y
-        pnet_bboxes.append(torch.round(bbox))
-        pnet_scores.append(y[0][1])
+        for scaled_im in image_pyramid:
+            scaled_im = pnet_resize(scaled_im)
+            out = pnet(scaled_im)
+            y, bbox = out["y_pred"], out["bbox_pred"]
+            y = torch.exp(y)
+            y = y / y.sum()
 
-    if len(pnet_bboxes):
-        pnet_bboxes = torch.vstack(pnet_bboxes)
-        pnet_scores = torch.tensor(pnet_scores)
-        bboxes_indices = nms(boxes=pnet_bboxes, scores=pnet_scores, iou_threshold=0.3)
-        pnet_bboxes = [pnet_bboxes[index] for index in bboxes_indices]
-        pnet_scores = torch.tensor([pnet_scores[index] for index in bboxes_indices])
-        for bbox in pnet_bboxes:
-            x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
-            x = torch.clip(x, min=0, max=orig_x)
-            y = torch.clip(y, min=0, max=orig_y)
-            pnet_candidates.append(im[:, :, y: y + h, x: x + w])
-            pnet_candidates_params.append((x, y, w, h))
+            if torch.argmax(y) == 1:
+                bbox[0][0] = bbox[0][0] * orig_x
+                bbox[0][2] = bbox[0][2] * orig_x
+                bbox[0][1] = bbox[0][1] * orig_y
+                bbox[0][3] = bbox[0][3] * orig_y
+                pnet_bboxes.append(torch.round(bbox))
+                pnet_scores.append(y[0][1])
 
-        for pnet_candidate_idx, pnet_candidate in enumerate(pnet_candidates):
-            rnet_candidates, rnet_candidates_params, rnet_bboxes, rnet_scores = [], [], [], []
-            image_pyramid = make_image_pyramid(pnet_candidate)
-            input_x, input_y = pnet_candidate.shape[3], pnet_candidate.shape[2]
-            for scaled_im in image_pyramid:
-                scaled_im = rnet_resize(scaled_im)
-                out = rnet(scaled_im)
-                y, bbox = out["y_pred"], out["bbox_pred"]
-                y = torch.exp(y)
-                y = y / y.sum()
-                if torch.argmax(y) == 1:
-                    bbox[0][0] = torch.clip(bbox[0][0] * input_x, 0, input_x)
-                    bbox[0][2] = torch.clip(bbox[0][2] * input_x, 0, input_x)
-                    bbox[0][1] = torch.clip(bbox[0][1] * input_y, 0, input_y)
-                    bbox[0][3] = torch.clip(bbox[0][3] * input_y, 0, input_y)
-                    rnet_bboxes.append(torch.round(bbox))
-                    rnet_scores.append(y[0][1])
+        if len(pnet_bboxes):
+            pnet_bboxes = torch.vstack(pnet_bboxes)
+            pnet_scores = torch.tensor(pnet_scores)
+            bboxes_indices = nms(boxes=pnet_bboxes, scores=pnet_scores, iou_threshold=0.3)
+            pnet_bboxes = [pnet_bboxes[index] for index in bboxes_indices]
+            pnet_scores = torch.tensor([pnet_scores[index] for index in bboxes_indices])
+            for bbox in pnet_bboxes:
+                x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
+                x = torch.clip(x, min=0, max=orig_x)
+                y = torch.clip(y, min=0, max=orig_y)
+                pnet_candidates.append(patch[:, :, y: y + h, x: x + w])
+                pnet_candidates_params.append((x, y, w, h))
 
-            if len(rnet_bboxes):
-                rnet_bboxes = torch.vstack(rnet_bboxes)
-                rnet_scores = torch.tensor(rnet_scores)
-                bboxes_indices = nms(boxes=rnet_bboxes, scores=rnet_scores, iou_threshold=0.3)
-                rnet_bboxes = [rnet_bboxes[index] for index in bboxes_indices]
-                rnet_scores = torch.tensor([rnet_scores[index] for index in bboxes_indices])
-                yx_offset = pnet_candidates_params[pnet_candidate_idx]
-                for bbox in rnet_bboxes:
-                    x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
-                    rnet_candidates.append(pnet_candidate[:, :, y: y + h, x: x + w])
-                    rnet_candidates_params.append((x + yx_offset[0], y + yx_offset[1], w, h))
+            for pnet_candidate_idx, pnet_candidate in enumerate(pnet_candidates):
+                rnet_candidates, rnet_candidates_params, rnet_bboxes, rnet_scores = [], [], [], []
+                image_pyramid = make_image_pyramid(pnet_candidate, min_pyramid_size=min_pyramid_size,
+                                                   reduction_factor=reduction_factor)
+                input_x, input_y = pnet_candidate.shape[3], pnet_candidate.shape[2]
+                for scaled_im in image_pyramid:
+                    scaled_im = rnet_resize(scaled_im)
+                    out = rnet(scaled_im)
+                    y, bbox = out["y_pred"], out["bbox_pred"]
+                    y = torch.exp(y)
+                    y = y / y.sum()
+                    if torch.argmax(y) == 1:
+                        bbox[0][0] = torch.clip(bbox[0][0] * input_x, 0, input_x)
+                        bbox[0][2] = torch.clip(bbox[0][2] * input_x, 0, input_x)
+                        bbox[0][1] = torch.clip(bbox[0][1] * input_y, 0, input_y)
+                        bbox[0][3] = torch.clip(bbox[0][3] * input_y, 0, input_y)
+                        rnet_bboxes.append(torch.round(bbox))
+                        rnet_scores.append(y[0][1])
 
-                for rnet_candidate_idx, rnet_candidate in enumerate(rnet_candidates):
-                    onet_candidates_offsets, onet_bboxes, onet_scores = [], [], []
-                    image_pyramid = make_image_pyramid(rnet_candidate)
-                    input_x, input_y = rnet_candidate.shape[3], rnet_candidate.shape[2]
-                    for scaled_im in image_pyramid:
-                        scaled_im = onet_resize(scaled_im)
-                        out = onet(scaled_im)
-                        y, bbox = out["y_pred"], out["bbox_pred"]
-                        y = torch.exp(y)
-                        y = y / y.sum()
-                        if torch.argmax(y) == 1:
-                            bbox[0][0] = torch.clip(bbox[0][0] * input_x, 0, input_x)
-                            bbox[0][2] = torch.clip(bbox[0][2] * input_x, 0, input_x)
-                            bbox[0][1] = torch.clip(bbox[0][1] * input_y, 0, input_y)
-                            bbox[0][3] = torch.clip(bbox[0][3] * input_y, 0, input_y)
-                            onet_bboxes.append(torch.round(bbox))
-                            onet_scores.append(y[0][1])
+                if len(rnet_bboxes):
+                    rnet_bboxes = torch.vstack(rnet_bboxes)
+                    rnet_scores = torch.tensor(rnet_scores)
+                    bboxes_indices = nms(boxes=rnet_bboxes, scores=rnet_scores, iou_threshold=0.3)
+                    rnet_bboxes = [rnet_bboxes[index] for index in bboxes_indices]
+                    rnet_scores = torch.tensor([rnet_scores[index] for index in bboxes_indices])
+                    yx_offset = pnet_candidates_params[pnet_candidate_idx]
+                    for bbox in rnet_bboxes:
+                        x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
+                        rnet_candidates.append(pnet_candidate[:, :, y: y + h, x: x + w])
+                        rnet_candidates_params.append((x + yx_offset[0], y + yx_offset[1], w, h))
 
-                    if len(onet_bboxes):
-                        onet_bboxes = torch.vstack(onet_bboxes)
-                        onet_scores = torch.hstack(onet_scores)
-                        bboxes_indices = nms(boxes=onet_bboxes, scores=onet_scores, iou_threshold=0.3)
-                        onet_bboxes = [onet_bboxes[index] for index in bboxes_indices]
-                        onet_scores = torch.tensor([onet_scores[index] for index in bboxes_indices])
-                        yx_offset = rnet_candidates_params[rnet_candidate_idx]
-                        for idx, bbox in enumerate(onet_bboxes):
-                            x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
-                            onet_candidates_offsets.append((x + yx_offset[0], y + yx_offset[1], w, h))
-                            final_bboxes.append(torch.tensor([x + yx_offset[0], y + yx_offset[1], w, h]).float())
-                            final_scores.append(onet_scores[idx])
+                    for rnet_candidate_idx, rnet_candidate in enumerate(rnet_candidates):
+                        onet_candidates_offsets, onet_bboxes, onet_scores = [], [], []
+                        image_pyramid = make_image_pyramid(rnet_candidate, min_pyramid_size=min_pyramid_size,
+                                                           reduction_factor=reduction_factor)
+                        input_x, input_y = rnet_candidate.shape[3], rnet_candidate.shape[2]
+                        for scaled_im in image_pyramid:
+                            scaled_im = onet_resize(scaled_im)
+                            out = onet(scaled_im)
+                            y, bbox = out["y_pred"], out["bbox_pred"]
+                            y = torch.exp(y)
+                            y = y / y.sum()
+                            if torch.argmax(y) == 1:
+                                bbox[0][0] = torch.clip(bbox[0][0] * input_x, 0, input_x)
+                                bbox[0][2] = torch.clip(bbox[0][2] * input_x, 0, input_x)
+                                bbox[0][1] = torch.clip(bbox[0][1] * input_y, 0, input_y)
+                                bbox[0][3] = torch.clip(bbox[0][3] * input_y, 0, input_y)
+                                onet_bboxes.append(torch.round(bbox))
+                                onet_scores.append(y[0][1])
 
-        final_scores = torch.tensor(final_scores).float()
-        return final_bboxes
-        # plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
+                        if len(onet_bboxes):
+                            onet_bboxes = torch.vstack(onet_bboxes)
+                            onet_scores = torch.hstack(onet_scores)
+                            bboxes_indices = nms(boxes=onet_bboxes, scores=onet_scores, iou_threshold=0.3)
+                            onet_bboxes = [onet_bboxes[index] for index in bboxes_indices]
+                            onet_scores = torch.tensor([onet_scores[index] for index in bboxes_indices])
+                            yx_offset = rnet_candidates_params[rnet_candidate_idx]
+                            for idx, bbox in enumerate(onet_bboxes):
+                                x, y, w, h = bbox[0].long(), bbox[1].long(), bbox[2].long(), bbox[3].long()
+                                onet_candidates_offsets.append((x + yx_offset[0], y + yx_offset[1], w, h))
+                                final_bboxes.append(
+                                    torch.tensor([x0 + x + yx_offset[0], y0 + y + yx_offset[1], w, h]).float())
+                                final_scores.append(onet_scores[idx])
+
+    final_scores = torch.tensor(final_scores).float()
+    return final_bboxes, final_scores
+    # plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
 
 def run_train_pnet():
@@ -344,9 +385,9 @@ def run_train_pnet():
     #                            n=1000, n_hard=0, out_size=(12, 12))
 
     train_dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3,
-                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
+                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=100, n_hard=0)
     val_dataset = MTCNNWiderFace(path="data/wider_face", partition="val", transform=transform, neg_th=0.3,
-                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
+                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=100, n_hard=0)
 
     train_params = {
         "lr": 1e-3,
@@ -438,7 +479,7 @@ def run_train_onet():
           out_dir="onet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
 
 
-def plot_image_with_bounding_box(image, bounding_boxes, frame_idx):
+def plot_image_with_bounding_box(image, bounding_boxes, freeze=False):
     # Loop over bounding boxes and draw them on the image
     for box in bounding_boxes:
         x, y, w, h = round(box[0].item()), round(box[1].item()), round(box[2].item()), round(box[3].item())
@@ -448,10 +489,52 @@ def plot_image_with_bounding_box(image, bounding_boxes, frame_idx):
     # Display the image with bounding boxes
     bgr_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     cv2.imshow(f'Frame', bgr_image)
-    cv2.waitKey(1)
+    if freeze:
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        cv2.waitKey(1)
 
 
-def capture_images(target_fps):
+def postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.96, iou_th=0.3):
+    if len(scores):
+        new_bboxes, new_scores = [], []
+        for idx, x in enumerate(scores > detection_th):
+            if x.item():
+                new_bboxes.append(bboxes[idx])
+                new_scores.append(scores[idx])
+        if len(new_scores):
+            bboxes, scores = new_bboxes, torch.hstack(new_scores)
+        else:
+            bboxes, scores = [], []
+
+    if len(bboxes):
+        bboxes = torch.vstack(bboxes)
+        selected_indices = nms(boxes=bboxes, scores=scores, iou_threshold=iou_th)
+        bboxes, scores = bboxes[selected_indices, :], scores[selected_indices]
+        bboxes_iou = IoU(bboxes, bboxes)
+        N = len(scores)
+        keep_map = np.ones(N)
+        for i in range(N):
+            if keep_map[i] == 0:
+                continue
+
+            for j in range(N):
+                if i == j:
+                    continue
+
+                if bboxes_iou[i, j] > iou_th:
+                    keep_map[j] = 0
+
+        if np.sum(keep_map) > 0:
+            bboxes = [bboxes[idx, :] for idx, token in enumerate(keep_map) if token > 0]
+            scores = torch.hstack([scores[idx] for idx, token in enumerate(keep_map) if token > 0])
+        else:
+            bboxes, scores = [], []
+    return bboxes, scores
+
+
+def live_face_detection(target_fps):
     # Initialize the camera
     cap = cv2.VideoCapture(0)  # 0 is the default camera, you can change it if you have multiple cameras
 
@@ -477,10 +560,10 @@ def capture_images(target_fps):
             break
 
         # Predict faces in the image and draw bounding boxes
-        bboxes = predict_faces_in_image(frame)
-
+        bboxes, scores = predict_faces_in_image(frame)
+        bboxes, scores = postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.95, iou_th=0)
         # Display the image with bounding boxes
-        plot_image_with_bounding_box(frame, bboxes, frame_idx)
+        plot_image_with_bounding_box(frame, bboxes)
         frame_idx += 1
         # Check for the 'q' key to quit the program
         if cv2.waitKey(delay) & 0xFF == ord('q'):
@@ -491,6 +574,34 @@ def capture_images(target_fps):
     cv2.destroyAllWindows()
 
 
+def find_jpg_files(folder_path, n, jpg_files=[]):
+    """
+    Recursively find JPG files in a folder and its subfolders.
+
+    Args:
+    - folder_path: The path to the folder to search.
+    - n: The number of JPG files to pick.
+    - jpg_files: A list to store the paths of JPG files found (default=[]).
+
+    Returns:
+    - A list of paths to JPG files.
+    """
+    if n == 0:
+        return jpg_files
+
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        if os.path.isdir(item_path):
+            jpg_files = find_jpg_files(item_path, n, jpg_files)
+        elif item.lower().endswith('.jpg'):
+            jpg_files.append(os.path.abspath(item_path))
+            n -= 1
+            if n == 0:
+                break
+
+    return jpg_files
+
+
 if __name__ == "__main__":
     # test_propose_net()
     # test_residual_net()
@@ -499,4 +610,16 @@ if __name__ == "__main__":
     run_train_pnet()
     # run_train_rnet()
     # run_train_onet()
-    # capture_images(target_fps=5)
+    # live_face_detection(target_fps=60)
+    # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
+    # n = 5
+    # files = find_jpg_files(folder_path=folder_path, n=n)
+    # for path in files:
+    # path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images/35--Basketball/35_Basketball_playingbasketball_35_868.jpg"
+    # frame = cv2.imread(path)
+    # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # bboxes, scores = predict_faces_in_image(frame, window_size=[(i, i) for i in range(100, 101, 50)],
+    #                                         min_pyramid_size=120, reduction_factor=0.01)
+    # bboxes, scores = postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.96, iou_th=0.5)
+    # # Display the image with bounding boxes
+    # plot_image_with_bounding_box(frame, bboxes, freeze=True)
