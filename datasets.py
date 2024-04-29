@@ -190,8 +190,9 @@ class MTCNNWiderFace(Dataset):
                         np.array([float(x) for x in lines[i].strip("\n").split(" ")[:4]]).reshape((1, -1)))
                     bboxes.append(bbox)
                     i += 1
-                if 0 < num_of_faces:
-                    self.im_paths.append(os.path.join(self.data_path, img_path))
+                im_path = os.path.join(self.data_path, img_path)
+                if 0 < num_of_faces and os.path.isfile(im_path):
+                    self.im_paths.append(im_path)
                     self.bbox.append(bboxes)
             else:
                 i += 1
