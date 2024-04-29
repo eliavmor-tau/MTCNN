@@ -385,9 +385,9 @@ def run_train_pnet():
     #                            n=1000, n_hard=0, out_size=(12, 12))
 
     train_dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3,
-                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=100, n_hard=0)
+                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
     val_dataset = MTCNNWiderFace(path="data/wider_face", partition="val", transform=transform, neg_th=0.3,
-                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=100, n_hard=0)
+                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=1000, n_hard=0)
 
     train_params = {
         "lr": 1e-3,

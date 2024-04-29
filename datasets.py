@@ -303,7 +303,7 @@ class MTCNNWiderFace(Dataset):
                             pos_count += 1
                         else:
                             tries += 1
-                        if tries >= 5:
+                        if tries >= 3:
                             break
                 if pos_count >= self.n // 2:
                     break
