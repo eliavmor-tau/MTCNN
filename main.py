@@ -407,7 +407,7 @@ def run_train_pnet():
 
     device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="pnet_training_wider_face", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          out_dir="pnet_training_large_celeba", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
           wd=1e-3)
 
 
