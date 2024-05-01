@@ -390,7 +390,7 @@ def run_train_pnet():
     #                              pos_th=0.65, min_crop=12, out_size=(12, 12), n=1000, n_hard=0)
 
     train_params = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "adam",
         "n_epochs": 100,
         "batch_size": 128,
@@ -398,9 +398,9 @@ def run_train_pnet():
     pnet = PNet()
 
     def lr_step(epoch):
-        if epoch <= 5:
+        if epoch <= 10:
             return 1
-        elif 5 < epoch <= 25:
+        elif 10 < epoch <= 40:
             return 0.1
         else:
             return 0.01
