@@ -379,20 +379,20 @@ def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction
 
 def run_train_pnet():
     transform = Compose([ToTensor()])
-    # train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-    #                              n=20000, n_hard=0, out_size=(12, 12))
-    # val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
-    #                            n=1000, n_hard=0, out_size=(12, 12))
+    train_dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
+                                 n=100000, n_hard=0, out_size=(12, 12))
+    val_dataset = MTCNNDataset(path="data/celebA", partition="val", transform=transform, min_crop=100, max_crop=180,
+                               n=10000, n_hard=0, out_size=(12, 12))
 
-    train_dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3,
-                                   pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
-    val_dataset = MTCNNWiderFace(path="data/wider_face", partition="val", transform=transform, neg_th=0.3,
-                                 pos_th=0.65, min_crop=12, out_size=(12, 12), n=1000, n_hard=0)
+    # train_dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3,
+    #                                pos_th=0.65, min_crop=12, out_size=(12, 12), n=10000, n_hard=0)
+    # val_dataset = MTCNNWiderFace(path="data/wider_face", partition="val", transform=transform, neg_th=0.3,
+    #                              pos_th=0.65, min_crop=12, out_size=(12, 12), n=1000, n_hard=0)
 
     train_params = {
         "lr": 1e-3,
         "optimizer": "adam",
-        "n_epochs": 20,
+        "n_epochs": 100,
         "batch_size": 128,
     }
     pnet = PNet()
@@ -400,8 +400,10 @@ def run_train_pnet():
     def lr_step(epoch):
         if epoch <= 5:
             return 1
-        else:
+        elif 5 < epoch <= 25:
             return 0.1
+        else:
+            return 0.01
 
     device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,

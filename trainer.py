@@ -5,7 +5,7 @@ from torch.optim import Adam, SGD
 from torch.optim.lr_scheduler import StepLR, LambdaLR
 from torch.nn.functional import cross_entropy, mse_loss
 from logger import Logger
-
+import numpy as np
 
 OPTIMIZERS = {
     "sgd": SGD,
@@ -49,7 +49,7 @@ def train(net, train_dataset, val_dataset, train_params, out_dir, lr_step, check
     device = torch.device(device=device)
     net.to(device)
     print(f"Training on {device}")
-
+    best_loss = np.inf
     for epoch in tqdm(range(n_epochs), desc=f"epochs", total=n_epochs):
         # train epoch
         train_detection_loss, train_bbox_loss, train_loss = 0, 0, 0
@@ -96,11 +96,14 @@ def train(net, train_dataset, val_dataset, train_params, out_dir, lr_step, check
             val_detection_loss = val_detection_loss / len(val_dataloader)
             val_bbox_loss = val_bbox_loss / len(val_dataloader)
             val_loss = val_loss / len(val_dataloader)
+            if val_loss < best_loss:
+                train_logger.save_model(model=net, checkpoint_name=f"best_checkpoint.pth")
+                best_loss = val_loss
             val_logger.write(line=[epoch, val_detection_loss, val_bbox_loss, val_loss, current_lr])
 
         # update step size
         lr_scheduler.step()
-        if epoch % 10 == 0:
+        if epoch % 1 == 0:
             print(f"train_detection_loss={train_detection_loss}")
             print(f"train_bbox_loss={train_bbox_loss}")
             print(f"val_detection_loss={val_detection_loss}")
