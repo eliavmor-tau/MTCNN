@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 from model import PNet, RNet, ONet
-from datasets import MTCNNDataset, FacesDataSet, MTCNNWiderFace
+from datasets import MTCNNDataset, CelebA, MTCNNWiderFace
 from torchvision.transforms import ToTensor, Compose, Resize
 from trainer import train
 import torch
@@ -26,7 +26,7 @@ def test_propose_net():
     pnet.eval()
 
     resize = Resize(size=(12, 12), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataset = CelebA(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -54,7 +54,7 @@ def test_residual_net():
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     resize = Resize(size=(24, 24), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="val", transform=transform)
+    dataset = CelebA(path="data/celebA", partition="val", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -80,7 +80,7 @@ def test_onet():
     onet.load_state_dict(checkpoint)
     onet.eval()
     resize = Resize(size=(48, 48), antialias=True)
-    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataset = CelebA(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -120,7 +120,7 @@ def test():
     onet.eval()
 
     transform = Compose([ToTensor()])
-    dataset = FacesDataSet(path="data/celebA", partition="test", transform=transform)
+    dataset = CelebA(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:

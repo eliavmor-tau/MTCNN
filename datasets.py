@@ -133,13 +133,13 @@ class MTCNNDataset(Dataset):
         return len(self.labels)
 
 
-class FacesDataSet(Dataset):
+class CelebA(Dataset):
 
     def __init__(self, path: str, partition: str, transform=None) -> Dataset:
-        super(FacesDataSet, self).__init__()
+        super(CelebA, self).__init__()
         self.path = path
-        data_partition = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
-        self.bbox = pd.read_csv(os.path.join(path, "list_bbox_celeba_align_and_crop.csv"), index_col=False)
+        data_partition = pd.read_csv(os.path.join(path, "list_eval_partition.csv"), index_col=False)
+        self.bbox = pd.read_csv(os.path.join(path, "list_bbox_celeba.csv"), index_col=False)
         if partition.lower() == "train":
             partition = 0
         elif partition.lower() == "val":
@@ -149,17 +149,17 @@ class FacesDataSet(Dataset):
         else:
             raise (f"unkonwn partition {partition}")
 
-        self.data_split = data_partition[data_partition['partition'] == partition].image_name
+        self.data_split = data_partition[data_partition['partition'] == partition].image_id
         self.transform = transform
 
     def __getitem__(self, item):
         if 0 <= item < self.__len__():
             sample_name = self.data_split.iloc[item]
-            bbox = torch.tensor(list(self.bbox[self.bbox['image_name'] == sample_name].to_numpy()[0][2:-1]))
+            info = list(self.bbox[self.bbox['image_id'] == sample_name].to_numpy())
             im = np.array(Image.open(os.path.join(self.path, "images", sample_name)))
             if self.transform is not None:
                 im = self.transform(im)
-            return im
+            return im, info
 
     def __len__(self):
         return len(self.data_split)
@@ -362,21 +362,21 @@ class WiderFace(Dataset):
         return len(self.im_paths)
 
 
-if __name__ == "__main__":
-    transform = Compose([ToTensor()])
-    #
-    # # test dataset.
-    # dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
-    #                        # n=20000, n_hard=0, out_size=(12, 12))
-    #                        n=100, n_hard=0, out_size=(12, 12))
-    # for i in range(len(dataset)):
-    #     im, bbox, label = dataset[i]
-    #     plot_im_with_bbox(im, [bbox * 12], title=f"image={i} label={label}")
-    # dataset = WiderFace(path="data/wider_face", partition="train")
-    out_size = 48
-    dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3, pos_th=0.65,
-                             min_crop=12, out_size=(out_size, out_size), n=20, n_hard=0)
-    for i in range(len(dataset)):
-        im, bbox, label = dataset[i]
-        bbox *= out_size
-        plot_im_with_bbox(im, [bbox], title=f"image={i}")
+# if __name__ == "__main__":
+#     transform = Compose([ToTensor()])
+#     #
+#     # # test dataset.
+#     # dataset = MTCNNDataset(path="data/celebA", partition="train", transform=transform, min_crop=100, max_crop=180,
+#     #                        # n=20000, n_hard=0, out_size=(12, 12))
+#     #                        n=100, n_hard=0, out_size=(12, 12))
+#     # for i in range(len(dataset)):
+#     #     im, bbox, label = dataset[i]
+#     #     plot_im_with_bbox(im, [bbox * 12], title=f"image={i} label={label}")
+#     # dataset = WiderFace(path="data/wider_face", partition="train")
+#     out_size = 48
+#     dataset = MTCNNWiderFace(path="data/wider_face", partition="train", transform=transform, neg_th=0.3, pos_th=0.65,
+#                              min_crop=12, out_size=(out_size, out_size), n=20, n_hard=0)
+#     for i in range(len(dataset)):
+#         im, bbox, label = dataset[i]
+#         bbox *= out_size
+#         plot_im_with_bbox(im, [bbox], title=f"image={i}")
