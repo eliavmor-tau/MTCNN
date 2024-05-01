@@ -414,32 +414,35 @@ def run_train_pnet():
 def run_train_rnet():
     transform = Compose([ToTensor()])
     pnet = PNet()
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     pnet.load_state_dict(checkpoint)
     train_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=100, max_crop=180, n=20000, n_hard=2000, out_size=(24, 24))
+                                 min_crop=100, max_crop=180, n=100000, n_hard=10000, out_size=(24, 24))
     val_dataset = MTCNNDataset(previous_net=pnet, previous_transform=Resize((12, 12)), path="data/celebA",
                                partition="val", transform=transform, min_crop=100,
                                max_crop=180, n=2000, n_hard=0, out_size=(24, 24))
 
     train_params = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 100,
         "batch_size": 128,
     }
     rnet = RNet()
     device = "cuda"
 
     def lr_step(epoch):
-        if epoch <= 30:
+        if epoch <= 10:
             return 1
-        else:
+        elif 10 < epoch <= 40:
             return 0.1
+        else:
+            return 0.01
 
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+          out_dir="rnet_training_large_celeba", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          wd=1e-3)
 
 
 def run_train_onet():
@@ -609,8 +612,8 @@ if __name__ == "__main__":
     # test_residual_net()
     # test_onet()
     # test()
-    run_train_pnet()
-    # run_train_rnet()
+    # run_train_pnet()
+    run_train_rnet()
     # run_train_onet()
     # live_face_detection(target_fps=60)
     # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
