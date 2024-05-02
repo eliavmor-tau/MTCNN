@@ -155,11 +155,12 @@ class CelebA(Dataset):
     def __getitem__(self, item):
         if 0 <= item < self.__len__():
             sample_name = self.data_split.iloc[item]
-            info = list(self.bbox[self.bbox['image_id'] == sample_name].to_numpy())
+            info = torch.tensor([float(x) for x in self.bbox[self.bbox['image_id'] == sample_name].to_numpy()[0][1:]])
             im = np.array(Image.open(os.path.join(self.path, "images", sample_name)))
             if self.transform is not None:
                 im = self.transform(im)
-            return im, info
+            # return im, info
+            return im
 
     def __len__(self):
         return len(self.data_split)

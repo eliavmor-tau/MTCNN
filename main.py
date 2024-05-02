@@ -10,7 +10,7 @@ from utils import plot_im_with_bbox, make_image_pyramid, nms, IoU
 from torch.utils.data import DataLoader
 import matplotlib
 
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import cv2
 
@@ -20,7 +20,7 @@ def test_propose_net():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     # Load the model state dictionary
     pnet.load_state_dict(checkpoint)
     pnet.eval()
@@ -49,12 +49,12 @@ def test_residual_net():
     transform = Compose([ToTensor()])
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('rnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     resize = Resize(size=(24, 24), antialias=True)
-    dataset = CelebA(path="data/celebA", partition="val", transform=transform)
+    dataset = CelebA(path="data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
 
     for im in dataloader:
@@ -450,23 +450,23 @@ def run_train_onet():
 
     pnet = PNet()
     # Load the checkpoint
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_large_celeba/checkpoint/best_checkpoint.pth')
 
     rnet = RNet()
     # Load the checkpoint
-    checkpoint = torch.load('rnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('rnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     # Load the model state dictionary
     rnet.load_state_dict(checkpoint)
     rnet.eval()
     train_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=40, max_crop=200, n=20000, n_hard=4000, out_size=(48, 48))
+                                 min_crop=40, max_crop=200, n=100000, n_hard=4000, out_size=(48, 48))
     val_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                partition="val", transform=transform, min_crop=40,
                                max_crop=200, n=2000, n_hard=0, out_size=(48, 48))
 
     train_params = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "adam",
         "n_epochs": 200,
         "batch_size": 128,
@@ -475,13 +475,16 @@ def run_train_onet():
     device = "cuda"
 
     def lr_step(epoch):
-        if epoch <= 30:
+        if epoch <= 10:
             return 1
-        else:
+        elif 10 < epoch <= 40:
             return 0.1
+        else:
+            return 0.01
 
     train(net=onet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="onet_training", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0], wd=1e-3)
+          out_dir="onet_training_large_celeba", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          wd=1e-3)
 
 
 def plot_image_with_bounding_box(image, bounding_boxes, freeze=False):
@@ -613,8 +616,8 @@ if __name__ == "__main__":
     # test_onet()
     # test()
     # run_train_pnet()
-    run_train_rnet()
-    # run_train_onet()
+    # run_train_rnet()
+    run_train_onet()
     # live_face_detection(target_fps=60)
     # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
     # n = 5
