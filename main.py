@@ -611,8 +611,11 @@ if __name__ == "__main__":
     # test_residual_net()
     # test_onet()
     # test()
+    print("start Pnet training!")
     run_train_pnet()
+    print("start Rnet training!")
     run_train_rnet()
+    print("start Onet training!")
     run_train_onet()
     # live_face_detection(target_fps=10)
     # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
