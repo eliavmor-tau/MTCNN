@@ -10,7 +10,7 @@ from utils import plot_im_with_bbox, make_image_pyramid, nms, IoU
 from torch.utils.data import DataLoader
 import matplotlib
 
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import cv2
 
@@ -251,13 +251,13 @@ def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction
 
     pnet = PNet()
     pnet_resize = Resize(size=(12, 12), antialias=True)
-    checkpoint = torch.load('pnet_training/checkpoint/last_epoch_checkpoint_200.pth')
+    checkpoint = torch.load('pnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     pnet.load_state_dict(checkpoint)
     pnet.eval()
 
     rnet = RNet()
     rnet_resize = Resize(size=(24, 24), antialias=True)
-    checkpoint = torch.load('rnet_training/checkpoint/checkpoint_epoch_30.pth')
+    checkpoint = torch.load('rnet_training_large_celeba/checkpoint/best_checkpoint.pth')
     rnet.load_state_dict(checkpoint)
     rnet.eval()
 
@@ -271,10 +271,7 @@ def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction
         image_patches += sliding_window(image=im, window_size=ws, stride=min(ws[0] // 2, 100))
     transform = Compose([ToTensor()])
     final_bboxes, final_scores = [], []
-    print(len(image_patches))
     for patch, x0, y0 in image_patches:
-        plt.imshow(patch)
-        plt.savefig(f"debug/test_{x0}_{y0}.jpg")
         patch = torch.unsqueeze(transform(patch), 0)
         image_pyramid = make_image_pyramid(patch, min_pyramid_size=min_pyramid_size, reduction_factor=reduction_factor)
         orig_x, orig_y = patch.shape[3], patch.shape[2]
@@ -374,7 +371,6 @@ def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction
 
     final_scores = torch.tensor(final_scores).float()
     return final_bboxes, final_scores
-    # plot_im_with_bbox(im[0], bboxes=final_bboxes, scores=final_scores, iou_threshold=0.2)
 
 
 def run_train_pnet():
@@ -392,7 +388,7 @@ def run_train_pnet():
     train_params = {
         "lr": 1e-2,
         "optimizer": "adam",
-        "n_epochs": 100,
+        "n_epochs": 400,
         "batch_size": 128,
     }
     pnet = PNet()
@@ -407,7 +403,7 @@ def run_train_pnet():
 
     device = "cuda"
     train(net=pnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="pnet_training_large_celeba", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          out_dir="pnet_training_large_celeba", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0],
           wd=1e-3)
 
 
@@ -426,7 +422,7 @@ def run_train_rnet():
     train_params = {
         "lr": 1e-2,
         "optimizer": "adam",
-        "n_epochs": 100,
+        "n_epochs": 400,
         "batch_size": 128,
     }
     rnet = RNet()
@@ -441,7 +437,7 @@ def run_train_rnet():
             return 0.01
 
     train(net=rnet, train_dataset=train_dataset, val_dataset=val_dataset, train_params=train_params,
-          out_dir="rnet_training_large_celeba", checkpoint_step=1, lr_step=lr_step, device=device, weights=[1.0, 1.0],
+          out_dir="rnet_training_large_celeba", checkpoint_step=10, lr_step=lr_step, device=device, weights=[1.0, 1.0],
           wd=1e-3)
 
 
@@ -460,7 +456,7 @@ def run_train_onet():
     rnet.eval()
     train_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                  partition="train", transform=transform,
-                                 min_crop=40, max_crop=200, n=100000, n_hard=4000, out_size=(48, 48))
+                                 min_crop=40, max_crop=200, n=100000, n_hard=0, out_size=(48, 48))
     val_dataset = MTCNNDataset(previous_net=rnet, previous_transform=Resize((24, 24)), path="data/celebA",
                                partition="val", transform=transform, min_crop=40,
                                max_crop=200, n=2000, n_hard=0, out_size=(48, 48))
@@ -468,7 +464,7 @@ def run_train_onet():
     train_params = {
         "lr": 1e-2,
         "optimizer": "adam",
-        "n_epochs": 200,
+        "n_epochs": 400,
         "batch_size": 128,
     }
     onet = ONet()
@@ -568,7 +564,7 @@ def live_face_detection(target_fps):
             break
 
         # Predict faces in the image and draw bounding boxes
-        bboxes, scores = predict_faces_in_image(frame)
+        bboxes, scores = predict_faces_in_image(frame, window_size=[(400, 400)])
         bboxes, scores = postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.95, iou_th=0)
         # Display the image with bounding boxes
         plot_image_with_bounding_box(frame, bboxes)
@@ -615,10 +611,10 @@ if __name__ == "__main__":
     # test_residual_net()
     # test_onet()
     # test()
-    # run_train_pnet()
-    # run_train_rnet()
+    run_train_pnet()
+    run_train_rnet()
     run_train_onet()
-    # live_face_detection(target_fps=60)
+    # live_face_detection(target_fps=10)
     # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
     # n = 5
     # files = find_jpg_files(folder_path=folder_path, n=n)
