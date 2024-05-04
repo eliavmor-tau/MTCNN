@@ -51,7 +51,7 @@ def test_network(net, resize_size, iou_threshold):
     resize = Resize(size=resize_size, antialias=True)
     dataset = CelebA(path="../data/celebA", partition="test", transform=transform)
     dataloader = DataLoader(dataset=dataset, batch_size=1)
-
+    counter = 0
     for im in dataloader:
         image_pyramid = make_image_pyramid(im)
         bboxes = []
@@ -66,6 +66,9 @@ def test_network(net, resize_size, iou_threshold):
             bbox[0][3] = bbox[0][3] * orig_y
             bboxes.append(bbox.detach()[0])
         plot_im_with_bbox(im[0], bboxes, scores=None, iou_threshold=iou_threshold)
+        counter += 1
+        if counter >= 10:
+            break
 
 
 def main():
@@ -75,17 +78,17 @@ def main():
     args = parse_arguments()
     if args.net == "pnet":
         pnet = PNet()
-        checkpoint_path = 'pnet_training_large_celeba/checkpoint/best_checkpoint.pth'
+        checkpoint_path = '../logs/pnet_training/checkpoint/best_checkpoint.pth'
         pnet = load_checkpoint(pnet, checkpoint_path)
         test_network(pnet, resize_size=(12, 12), iou_threshold=0.6)
     elif args.net == "rnet":
         rnet = RNet()
-        checkpoint_path = 'rnet_training_large_celeba/checkpoint/best_checkpoint.pth'
+        checkpoint_path = '../logs/rnet_training/checkpoint/best_checkpoint.pth'
         rnet = load_checkpoint(rnet, checkpoint_path)
         test_network(rnet, resize_size=(24, 24), iou_threshold=0.2)
     elif args.net == "onet":
         onet = ONet()
-        checkpoint_path = 'logs/onet_training/checkpoint/last_epoch_checkpoint_200.pth'
+        checkpoint_path = '../logs/onet_training/checkpoint/best_checkpoint.pth'
         onet = load_checkpoint(onet, checkpoint_path)
         test_network(onet, resize_size=(48, 48), iou_threshold=0.2)
 

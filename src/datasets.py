@@ -39,9 +39,9 @@ class MTCNNDataset(Dataset):
         self.previous_net = previous_net
         self.previous_transform = previous_transform
         self.path = path
-        data_partition = pd.read_csv(os.path.join(path, "../data/celebA/images/list_bbox_celeba_align_and_crop.csv"),
+        data_partition = pd.read_csv(os.path.join(path, "images/list_bbox_celeba_align_and_crop.csv"),
                                      index_col=False)
-        self.bbox = pd.read_csv(os.path.join(path, "../data/celebA/images/list_bbox_celeba_align_and_crop.csv"),
+        self.bbox = pd.read_csv(os.path.join(path, "images/list_bbox_celeba_align_and_crop.csv"),
                                 index_col=False)
         if partition.lower() == "train":
             partition = 0

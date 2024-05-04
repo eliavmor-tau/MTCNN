@@ -6,6 +6,7 @@ import torch
 from utils import make_image_pyramid, nms, IoU
 import cv2
 import time
+import argparse
 
 
 def sliding_window(image, window_size, stride):
@@ -272,6 +273,8 @@ def live_face_detection(target_fps):
 
     Args:
         target_fps (int): Target frames per second for the live stream.
+        record (bool): Whether to record the video or not.
+        output_file (str): Output filename for the recorded video.
     """
     # Initialize the camera
     cap = cv2.VideoCapture(0)  # 0 is the default camera, you can change it if you have multiple cameras
@@ -300,13 +303,13 @@ def live_face_detection(target_fps):
 
         # Measure the time for performance evaluation
         t = time.time()
-
         # Predict faces in the image and draw bounding boxes
         bboxes, scores = predict_faces_in_image(frame, window_size=[(500, 500)], reduction_factor=0.1)
         bboxes, scores = postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.90, iou_th=0)
 
         # Print the frames per second
-        print(f"FPS={60 / (time.time() - t)}")
+        if not (frame_idx % 1000):
+            print(f"FPS={60 / (time.time() - t)}")
 
         # Display the image with bounding boxes
         plot_image_with_bounding_box(frame, bboxes)
@@ -317,10 +320,14 @@ def live_face_detection(target_fps):
         if cv2.waitKey(delay) & 0xFF == ord('q'):
             break
 
-    # Release the capture
+    # Release the capture and video writer
     cap.release()
     cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    live_face_detection(target_fps=200)
+    parser = argparse.ArgumentParser(description='Live Face Detection')
+    parser.add_argument('--fps', type=int, default=60, help='Target frames per second for the live stream')
+    args = parser.parse_args()
+
+    live_face_detection(target_fps=args.fps)
