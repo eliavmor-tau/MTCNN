@@ -14,3 +14,4 @@ data/wider_face/WIDER_val.zip
 data/.DS_Store
 data/celebA/.DS_Store
 .DS_Store
+src/generate_labels.py
