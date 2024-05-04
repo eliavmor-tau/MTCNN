@@ -78,8 +78,8 @@ then use
 python run_face_detection.py --fps 200
 ```
 to start running your MTCNN on live images.
-![Live Face Detection Demo](https://youtu.be/5FbdGX8gehg)
 
+https://github.com/eliavmor-tau/MTCNN/assets/74044819/6be3415d-ed77-4da0-a4fd-12d89ff33453
 
 ## References
 
