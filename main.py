@@ -263,12 +263,14 @@ def predict_faces_in_image(im, window_size=None, min_pyramid_size=100, reduction
 
     onet = ONet()
     onet_resize = Resize(size=(48, 48), antialias=True)
-    checkpoint = torch.load('onet_training/checkpoint/best_checkpoint.pth')
+    checkpoint = torch.load('onet_training/checkpoint/checkpoint_epoch_30.pth')
     onet.load_state_dict(checkpoint)
     onet.eval()
+    # prepare windows
     image_patches = []
     for ws in window_size:
         image_patches += sliding_window(image=im, window_size=ws, stride=min(ws[0] // 2, 100))
+
     transform = Compose([ToTensor()])
     final_bboxes, final_scores = [], []
     for patch, x0, y0 in image_patches:
@@ -539,6 +541,7 @@ def postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.96, iou_th=0.3)
 
 
 def live_face_detection(target_fps):
+    import time
     # Initialize the camera
     cap = cv2.VideoCapture(0)  # 0 is the default camera, you can change it if you have multiple cameras
 
@@ -562,10 +565,11 @@ def live_face_detection(target_fps):
         if not ret:
             print("Error: Can't receive frame (stream end?). Exiting ...")
             break
-
+        t = time.time()
         # Predict faces in the image and draw bounding boxes
-        bboxes, scores = predict_faces_in_image(frame, window_size=[(400, 400)])
+        bboxes, scores = predict_faces_in_image(frame, window_size=[(400, 400)], reduction_factor=0.01)
         bboxes, scores = postprocess_bboxes_and_scores(bboxes, scores, detection_th=0.95, iou_th=0)
+        print(f"FPS={60 / (time.time() - t)}")
         # Display the image with bounding boxes
         plot_image_with_bounding_box(frame, bboxes)
         frame_idx += 1
@@ -616,8 +620,8 @@ if __name__ == "__main__":
     # print("start Rnet training!")
     # run_train_rnet()
     # print("start Onet training!")
-    run_train_onet()
-    # live_face_detection(target_fps=10)
+    # run_train_onet()
+    live_face_detection(target_fps=200)
     # folder_path = "/Users/eliav/Documents/GitHub/MTCNN/MTCNN/data/wider_face/WIDER_test/images"
     # n = 5
     # files = find_jpg_files(folder_path=folder_path, n=n)
